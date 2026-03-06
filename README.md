@@ -1,4 +1,5 @@
 # QuestCast
+<<<<<<< HEAD
 
 Live challenge registration platform med blockchain-integrasjon.
 
@@ -96,3 +97,6 @@ Dette er et privat repo for MVP-utvikling. Kontakt prosjekteier for tilgang.
 ## 📄 Lisens
 
 ISC
+=======
+Challenges for money
+>>>>>>> bed39ab3c204f35058320089a0e3c73599eebd17
