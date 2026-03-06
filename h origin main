@@ -1,0 +1,38 @@
+[33mcommit 6d0f0772be7c0c2b54cb3f8675f309fe051f495d[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m
+Merge: 8874ed2 bed39ab
+Author: Fiskepumper <kristianholstad0606@gmail.com>
+Date:   Fri Mar 6 21:13:14 2026 +0100
+
+    Merge with GitHub workflow files
+
+[33mcommit 8874ed2180bc91df308f51dbaa7edfdfd1fea051[m
+Author: Fiskepumper <kristianholstad0606@gmail.com>
+Date:   Fri Mar 6 21:04:32 2026 +0100
+
+    Add minimal Node.js Express app for Azure deployment - Pakker inn kaka
+
+ .gitignore           |  34 [32m++++++[m
+ README.md            |  98 [32m+++++++++++++++++[m
+ README_Deployment.md | 304 [32m+++++++++++++++++++++++++++++++++++++++++++++++++++[m
+ package.json         |  23 [32m++++[m
+ server.js            |  80 [32m++++++++++++++[m
+ 5 files changed, 539 insertions(+)
+
+[33mcommit bed39ab3c204f35058320089a0e3c73599eebd17[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: Fiskepumper <kristianholstad0606@gmail.com>
+Date:   Thu Mar 5 19:31:56 2026 +0100
+
+    Add or update the Azure App Service build and deployment workflow config
+
+ .github/workflows/main_questcast.yml | 65 [32m++++++++++++++++++++++++++++++++++++[m
+ 1 file changed, 65 insertions(+)
+
+[33mcommit a7976998c32f724209fbfe140ac48599c53df87a[m
+Author: Fiskepumper <kristianholstad0606@gmail.com>
+Date:   Thu Mar 5 19:14:29 2026 +0100
+
+    Initial commit
+
+ .gitignore | 139 [32m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[m
+ README.md  |   2 [32m+[m
+ 2 files changed, 141 insertions(+)

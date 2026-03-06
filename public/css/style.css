@@ -1,0 +1,47 @@
+/* QuestCast Styling */
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #73be1c 100%);
+  color: white;
+  min-height: 100vh;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-weight: 300;
+}
+
+.status {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+.status p {
+  margin: 10px 0;
+}
+
+.status ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.status li {
+  margin: 5px 0;
+}
