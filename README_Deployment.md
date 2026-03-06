@@ -2,6 +2,11 @@
 
 Enkel guide for å deploye QuestCast til Azure via GitHub.
 
+git add . = Velg hvilke ingredienser/deler som skal med
+git commit = Pakk i boks (lokal snapshot) 📦
+git pull = Se hva som finnes på bordet fra før
+git push = Send boksen fra PC → GitHub → Azure 🚀
+
 ---
 
 ## 🚀 Deployment (Kjør i rekkefølge)
@@ -169,11 +174,30 @@ git add .
 # Commit
 git commit -m "Add registration form with email validation"
 
-# Push til GitHub (første gang)
+# Push til GitHub (første gang du pusher denne branchen)
 git push -u origin kristian/registration-form
+```
 
-# Push senere (når branch finnes)
+**Hva er `-u`?**
+- `-u` = "upstream" - kobler lokal branch til GitHub branch
+- **Kun nødvendig FØRSTE gang** du pusher en ny branch
+- Etter det kan du bare skrive `git push`
+
+**Eksempel:**
+```bash
+# Første push av ny branch
+git push -u origin kristian/registration-form
+# Output: Branch 'kristian/registration-form' set up to track remote branch...
+
+# Andre push (samme branch)
 git push
+# Git husker nå hvor den skal pushe!
+```
+
+**Push senere (når branch allerede finnes på GitHub):**
+```bash
+git push
+# Ingen -u nødvendig - Git husker connection!
 ```
 
 ---
@@ -229,16 +253,27 @@ git push origin main
 ### Sjekkliste: Unngå feil
 
 **FØR du committer:**
-- [ ] `git branch` - Er jeg på riktig branch?
-- [ ] `git status` - Hvilke filer endrer jeg?
+- [ ] `git branch` eller `git status` - **Er jeg på riktig branch?**
+  - Sikrer at du ikke committer til main ved et uhell
+  - Stjernen (*) viser aktiv branch
+- [ ] `git status` - **Hvilke filer endrer jeg?**
+  - Sjekk at kun relevante filer er staged (grønn)
 
-**FØR du pusher til main:**
-- [ ] Er feature ferdig og testet?
+**FØR du pusher:**
+- [ ] Er feature ferdig og testet lokalt? (`npm start` på localhost:3000)
+- [ ] Bruker jeg `-u` hvis dette er første push av branchen?
+  - `git push -u origin branch-navn` (første gang)
+  - `git push` (senere pusher)
+
+**FØR du merger til main:**
 - [ ] Har kollega gjort endringer på main? (`git pull origin main`)
+- [ ] Test at koden fungerer etter merge
+- [ ] Sjekk at det ikke er konflikter
 
-**FØR du merger:**
-- [ ] Test at koden fungerer lokalt
-- [ ] Sjekk at det ikke er konflikter med main
+**Huskeregel:**
+```
+1. Sjekk branch → 2. Commit → 3. Push (-u første gang) → 4. Merge til main
+```
 
 ---
 
