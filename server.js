@@ -13,6 +13,9 @@ const initDb   = require('./db/init');
 
 const app = express();
 
+// Trust Azure App Service reverse proxy (required for secure session cookies over HTTPS)
+app.set('trust proxy', 1);
+
 // Azure App Service setter PORT environment variable
 const PORT = process.env.PORT || 3000;
 
