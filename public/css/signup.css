@@ -49,6 +49,36 @@
 
 .modal-close:hover { color: #00ffcc; }
 
+.modal-back-btn {
+  background: none;
+  border: none;
+  color: #00ffcc;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 12px;
+  font-family: 'Poppins', sans-serif;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.modal-back-btn:hover { opacity: 1; }
+
+.modal-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+  color: #444;
+  font-size: 0.8rem;
+}
+.modal-divider::before,
+.modal-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #333;
+}
+
 .modal-title {
   font-size: 1.8rem;
   font-weight: 700;
@@ -127,24 +157,6 @@
 .metamask-btn:hover {
   border-color: rgba(255, 140, 0, 0.6);
   background: rgba(255, 140, 0, 0.08);
-}
-
-.metamask-qr-btn {
-  width: 100%;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  border-color: rgba(0, 255, 204, 0.3);
-  color: #00ffcc;
-  font-size: 0.85rem;
-}
-
-.metamask-qr-btn:hover {
-  border-color: rgba(0, 255, 204, 0.6);
-  background: rgba(0, 255, 204, 0.06);
-}
-
-.qr-icon {
-  font-size: 1.2rem;
 }
 
 .oauth-icon {

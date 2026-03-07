@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="/css/footer.css">
   <link rel="stylesheet" href="/css/signup.css">
   <%- style %>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
 </head>
 <body>
   <!-- Global Navbar -->
@@ -72,50 +71,77 @@
   <div class="modal-overlay" id="signup-modal" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="modal-box">
       <button class="modal-close" onclick="document.getElementById('signup-modal').classList.remove('open')">&times;</button>
-      <h2 class="modal-title">Join QuestCast</h2>
-      <p class="modal-subtitle">Registrer deg for å delta i challenges</p>
 
-      <% if (locals.authError === 'not-configured') { %>
-        <div class="modal-error">⚠️ Denne innloggingsmetoden er ikke konfigurert ennå.</div>
-      <% } else if (locals.authError) { %>
-        <div class="modal-error">⚠️ Innlogging feilet. Prøv igjen eller bruk et annet alternativ.</div>
-      <% } %>
+      <!-- View 1: OAuth-valg -->
+      <div id="modal-view-main">
+        <h2 class="modal-title">Join QuestCast</h2>
+        <p class="modal-subtitle">Registrer deg for å delta i challenges</p>
 
-      <!-- OAuth providers -->
-      <div class="oauth-buttons">
-        <a href="/auth/google" class="oauth-btn">
-          <img src="/google.png" alt="Google" class="oauth-icon">
-          <span>Fortsett med Google</span>
-        </a>
-        <a href="/auth/microsoft" class="oauth-btn">
-          <img src="/microsoft.png" alt="Microsoft" class="oauth-icon">
-          <span>Fortsett med Microsoft</span>
-        </a>
-        <button type="button" id="metamask-btn" class="oauth-btn metamask-btn">
-          <img src="/MetaMaskLogo.png" alt="MetaMask" class="oauth-icon">
-          <span>Fortsett med MetaMask</span>
-        </button>
-        <button type="button" id="metamask-qr-btn" class="oauth-btn metamask-qr-btn">
-          <span class="qr-icon">📱</span>
-          <span>Skann QR med MetaMask (mobil)</span>
-        </button>
+        <% if (locals.authError === 'not-configured') { %>
+          <div class="modal-error">⚠️ Denne innloggingsmetoden er ikke konfigurert ennå.</div>
+        <% } else if (locals.authError) { %>
+          <div class="modal-error">⚠️ Innlogging feilet. Prøv igjen eller bruk et annet alternativ.</div>
+        <% } %>
+
+        <div class="oauth-buttons">
+          <a href="/auth/google" class="oauth-btn">
+            <img src="/google.png" alt="Google" class="oauth-icon">
+            <span>Fortsett med Google</span>
+          </a>
+          <a href="/auth/microsoft" class="oauth-btn">
+            <img src="/microsoft.png" alt="Microsoft" class="oauth-icon">
+            <span>Fortsett med Microsoft</span>
+          </a>
+          <button type="button" id="metamask-btn" class="oauth-btn metamask-btn">
+            <img src="/MetaMaskLogo.png" alt="MetaMask" class="oauth-icon">
+            <span>Fortsett med MetaMask</span>
+          </button>
+        </div>
       </div>
 
-      <!-- QR-kode panel -->
-      <div id="metamask-qr-panel" style="display:none;text-align:center;margin-top:16px;">
-        <p style="color:#aaa;font-size:0.82rem;margin-bottom:10px;">Skann med MetaMask-appen på telefonen</p>
-        <canvas id="metamask-qr-canvas" style="border-radius:12px;border:2px solid #00ffcc;padding:8px;background:#fff;"></canvas>
-        <p style="color:#666;font-size:0.75rem;margin-top:8px;">Åpner QuestCast i MetaMask sin nettleser</p>
+      <!-- View 2: MetaMask QR -->
+      <div id="modal-view-metamask" style="display:none;">
+        <button type="button" class="modal-back-btn" id="metamask-back-btn">&#8592; Tilbake</button>
+        <h2 class="modal-title">MetaMask</h2>
+        <p class="modal-subtitle">Skann med MetaMask-appen på telefonen</p>
+
+        <div style="text-align:center;margin:16px 0;">
+          <img id="metamask-qr-img" src="" alt="QR kode" style="border-radius:12px;border:2px solid #00ffcc;padding:8px;background:#fff;width:210px;height:210px;display:block;margin:0 auto;">
+          <p style="color:#666;font-size:0.75rem;margin-top:8px;">Åpner QuestCast i MetaMask sin nettleser</p>
+        </div>
+
+        <div id="metamask-device-wrap">
+          <div class="modal-divider"><span>eller</span></div>
+          <button type="button" id="metamask-device-btn" class="oauth-btn metamask-btn">
+            <img src="/MetaMaskLogo.png" alt="MetaMask" class="oauth-icon">
+            <span>Continue with this device</span>
+          </button>
+        </div>
       </div>
 
       <script>
-        document.getElementById('metamask-btn').addEventListener('click', async () => {
+        function showMetaMaskView() {
+          document.getElementById('modal-view-main').style.display = 'none';
+          document.getElementById('modal-view-metamask').style.display = 'block';
+
+          const host = window.location.hostname === 'localhost'
+            ? 'questcast-gfejc6f4g0ddehbq.azurewebsites.net'
+            : window.location.hostname;
+          const url = 'https://metamask.app.link/dapp/' + host;
+          const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=210x210&margin=6&data=' + encodeURIComponent(url);
+          document.getElementById('metamask-qr-img').src = qrApi;
+        }
+
+        document.getElementById('metamask-btn').addEventListener('click', showMetaMaskView);
+
+        document.getElementById('metamask-back-btn').addEventListener('click', () => {
+          document.getElementById('modal-view-metamask').style.display = 'none';
+          document.getElementById('modal-view-main').style.display = 'block';
+        });
+
+        document.getElementById('metamask-device-btn').addEventListener('click', async () => {
           if (!window.ethereum) {
-            // Ingen MetaMask-utvidelse — vis QR i stedet
-            document.getElementById('metamask-qr-panel').style.display = 'block';
-            document.getElementById('metamask-qr-btn').style.display = 'none';
-            const url = 'https://metamask.app.link/dapp/' + window.location.hostname;
-            QRCode.toCanvas(document.getElementById('metamask-qr-canvas'), url, { width: 200, margin: 1 });
+            alert('MetaMask-utvidelsen er ikke installert i denne nettleseren.');
             return;
           }
           try {
@@ -130,16 +156,6 @@
             else alert('Noe gikk galt. Prøv igjen.');
           } catch (err) {
             alert('MetaMask-tilkobling avbrutt.');
-          }
-        });
-
-        document.getElementById('metamask-qr-btn').addEventListener('click', () => {
-          const panel = document.getElementById('metamask-qr-panel');
-          const isVisible = panel.style.display !== 'none';
-          panel.style.display = isVisible ? 'none' : 'block';
-          if (!isVisible) {
-            const url = 'https://metamask.app.link/dapp/' + window.location.hostname;
-            QRCode.toCanvas(document.getElementById('metamask-qr-canvas'), url, { width: 200, margin: 1 });
           }
         });
       </script>
