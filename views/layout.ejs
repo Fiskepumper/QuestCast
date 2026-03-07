@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/css/footer.css">
   <link rel="stylesheet" href="/css/signup.css">
   <%- style %>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
 </head>
 <body>
   <!-- Global Navbar -->
@@ -94,12 +95,27 @@
           <img src="/MetaMaskLogo.png" alt="MetaMask" class="oauth-icon">
           <span>Fortsett med MetaMask</span>
         </button>
+        <button type="button" id="metamask-qr-btn" class="oauth-btn metamask-qr-btn">
+          <span class="qr-icon">📱</span>
+          <span>Skann QR med MetaMask (mobil)</span>
+        </button>
+      </div>
+
+      <!-- QR-kode panel -->
+      <div id="metamask-qr-panel" style="display:none;text-align:center;margin-top:16px;">
+        <p style="color:#aaa;font-size:0.82rem;margin-bottom:10px;">Skann med MetaMask-appen på telefonen</p>
+        <canvas id="metamask-qr-canvas" style="border-radius:12px;border:2px solid #00ffcc;padding:8px;background:#fff;"></canvas>
+        <p style="color:#666;font-size:0.75rem;margin-top:8px;">Åpner QuestCast i MetaMask sin nettleser</p>
       </div>
 
       <script>
         document.getElementById('metamask-btn').addEventListener('click', async () => {
           if (!window.ethereum) {
-            alert('MetaMask ikke installert. Last ned MetaMask-nettleserutvidelsen først.');
+            // Ingen MetaMask-utvidelse — vis QR i stedet
+            document.getElementById('metamask-qr-panel').style.display = 'block';
+            document.getElementById('metamask-qr-btn').style.display = 'none';
+            const url = 'https://metamask.app.link/dapp/' + window.location.hostname;
+            QRCode.toCanvas(document.getElementById('metamask-qr-canvas'), url, { width: 200, margin: 1 });
             return;
           }
           try {
@@ -114,6 +130,16 @@
             else alert('Noe gikk galt. Prøv igjen.');
           } catch (err) {
             alert('MetaMask-tilkobling avbrutt.');
+          }
+        });
+
+        document.getElementById('metamask-qr-btn').addEventListener('click', () => {
+          const panel = document.getElementById('metamask-qr-panel');
+          const isVisible = panel.style.display !== 'none';
+          panel.style.display = isVisible ? 'none' : 'block';
+          if (!isVisible) {
+            const url = 'https://metamask.app.link/dapp/' + window.location.hostname;
+            QRCode.toCanvas(document.getElementById('metamask-qr-canvas'), url, { width: 200, margin: 1 });
           }
         });
       </script>

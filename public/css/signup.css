@@ -129,6 +129,24 @@
   background: rgba(255, 140, 0, 0.08);
 }
 
+.metamask-qr-btn {
+  width: 100%;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  border-color: rgba(0, 255, 204, 0.3);
+  color: #00ffcc;
+  font-size: 0.85rem;
+}
+
+.metamask-qr-btn:hover {
+  border-color: rgba(0, 255, 204, 0.6);
+  background: rgba(0, 255, 204, 0.06);
+}
+
+.qr-icon {
+  font-size: 1.2rem;
+}
+
 .oauth-icon {
   width: 28px;
   height: 28px;
