@@ -43,7 +43,7 @@
             </div>
             <script>
               (async () => {
-                const addr = '<%= currentUser.walletAddress %>';
+                const addr = <%- JSON.stringify(currentUser.walletAddress) %>;
                 async function fetchNavBalance() {
                   try {
                     const r = await fetch('/api/contract-balance?address=' + encodeURIComponent(addr));
