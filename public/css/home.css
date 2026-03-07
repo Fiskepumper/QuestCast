@@ -75,6 +75,8 @@ h2 {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .badge-active {
@@ -173,5 +175,58 @@ h2 {
 @keyframes pulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 0.8; }
+}
+
+/* ── Mobile ────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .section-title {
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+  }
+
+  .challenge-card {
+    padding: 18px 16px;
+    border-radius: 16px;
+    margin-bottom: 14px;
+  }
+
+  .challenge-title-row h4 {
+    font-size: 1.1rem;
+  }
+
+  .challenge-icon {
+    font-size: 1.2rem;
+  }
+
+  .challenge-badge {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+  }
+
+  .challenge-desc {
+    font-size: 0.88rem;
+  }
+
+  .progress-labels {
+    font-size: 0.8rem;
+  }
+
+  .progress-bar-track {
+    height: 8px;
+  }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .participants-label {
+    font-size: 0.8rem;
+  }
+
+  .avatars {
+    gap: 8px;
+  }
 }
 

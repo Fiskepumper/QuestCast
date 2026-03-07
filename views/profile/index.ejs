@@ -102,7 +102,7 @@
         <div class="token-card" id="usdc-card" onclick="openPanel('usdc')">
           <img src="/usdc-pol.png" alt="USDC" class="token-logo">
           <div class="token-info">
-            <span class="token-name">USDC</span>
+            <span class="token-name">USDC <span class="live-dot" id="usdc-live-dot" title="Oppdateres hvert 30s"></span></span>
             <span class="token-amount" id="wallet-usdc-balance">–</span>
             <span class="token-converted">Polygon Network</span>
           </div>
@@ -173,6 +173,9 @@
             walletUsdcBalance = parseFloat(data.usdc);
             document.getElementById('pol-balance').textContent         = data.pol + ' POL';
             document.getElementById('wallet-usdc-balance').textContent = data.usdc + ' USDC';
+            // Blink USDC live-dot
+            const usdcDot = document.getElementById('usdc-live-dot');
+            if (usdcDot) { usdcDot.classList.add('blink'); setTimeout(() => usdcDot.classList.remove('blink'), 600); }
           } catch (e) {
             console.error('Balanse-feil:', e.message);
           }

@@ -508,3 +508,116 @@
   opacity: 1;
   box-shadow: 0 0 6px #00ffcc;
 }
+
+/* ── Mobile ────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .profile-container {
+    padding: 0 4px;
+  }
+
+  .profile-title {
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+  }
+
+  .profile-card {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .profile-avatar-preview {
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+  }
+
+  .profile-avatar-img,
+  .profile-avatar-placeholder {
+    width: 56px;
+    height: 56px;
+    font-size: 1.4rem;
+  }
+
+  .profile-name {
+    font-size: 1rem;
+  }
+
+  .avatar-choices {
+    gap: 8px;
+  }
+
+  .avatar-choice-inner {
+    padding: 12px 4px;
+    font-size: 0.72rem;
+  }
+
+  .avatar-choice-img,
+  .avatar-choice-placeholder {
+    width: 42px;
+    height: 42px;
+  }
+
+  /* Wallet card */
+  .wallet-connected {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .wallet-address {
+    font-size: 0.72rem;
+    word-break: break-all;
+    flex: 1 1 100%;
+    order: 2;
+  }
+
+  .wallet-dot { order: 1; }
+  .copy-btn   { order: 3; }
+  .wallet-badge { order: 4; }
+
+  /* Token cards — stable side by side */
+  .token-balances {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .token-card {
+    padding: 10px 10px;
+    gap: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .token-logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .token-amount {
+    font-size: 0.82rem;
+  }
+
+  /* USDC deposit/withdraw — stack vertically */
+  .usdc-input-group {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .usdc-input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .usdc-btn {
+    flex: 1;
+    padding: 10px 10px;
+    font-size: 0.8rem;
+  }
+
+  .usdc-btn.max-btn {
+    flex: 0 0 auto;
+  }
+
+  .action-panel {
+    padding: 14px 12px;
+  }
+}
