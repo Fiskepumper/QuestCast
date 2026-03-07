@@ -1,0 +1,46 @@
+<link rel="stylesheet" href="/css/signup.css">
+
+<div class="signup-container">
+  <h1 class="signup-title">Join QuestCast</h1>
+  <p class="signup-subtitle">Registrer deg med din sosiale profil for å delta i challenges</p>
+
+  <% if (success) { %>
+    <div class="signup-success">
+      ✅ Du er nå registrert! Velkommen til QuestCast.
+    </div>
+  <% } %>
+
+  <form class="signup-form" action="/signup" method="POST">
+    <p class="platform-label">Velg plattform</p>
+    <div class="platform-cards">
+      <label class="platform-card">
+        <input type="radio" name="platform" value="instagram" required>
+        <div class="platform-inner">
+          <span class="platform-icon">📸</span>
+          <span class="platform-name">Instagram</span>
+        </div>
+      </label>
+      <label class="platform-card">
+        <input type="radio" name="platform" value="facebook">
+        <div class="platform-inner">
+          <span class="platform-icon">👤</span>
+          <span class="platform-name">Facebook</span>
+        </div>
+      </label>
+      <label class="platform-card">
+        <input type="radio" name="platform" value="tiktok">
+        <div class="platform-inner">
+          <span class="platform-icon">🎵</span>
+          <span class="platform-name">TikTok</span>
+        </div>
+      </label>
+    </div>
+
+    <div class="signup-field">
+      <label for="username">Brukernavn / handle</label>
+      <input type="text" id="username" name="username" placeholder="@dittbrukernavn" required autocomplete="off">
+    </div>
+
+    <button type="submit" class="signup-submit">Registrer meg</button>
+  </form>
+</div>

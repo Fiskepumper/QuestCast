@@ -1,0 +1,312 @@
+<link rel="stylesheet" href="/css/profile.css">
+
+<div class="profile-container">
+  <h1 class="profile-title">Din profil</h1>
+
+  <% if (locals.saved) { %>
+    <div class="profile-success">✅ Profilen din er oppdatert!</div>
+  <% } %>
+
+  <div class="profile-card">
+    <!-- Current avatar preview -->
+    <div class="profile-avatar-preview">
+      <% const currentAvatar = user.avatarChoice || 'platform'; %>
+      <% if (currentAvatar === 'Cosen') { %>
+        <img src="/Cosen.png" alt="Avatar" class="profile-avatar-img">
+      <% } else if (currentAvatar === 'Jeppe') { %>
+        <img src="/Jeppe.png" alt="Avatar" class="profile-avatar-img">
+      <% } else if (user.avatarUrl) { %>
+        <img src="<%= user.avatarUrl %>" alt="Avatar" class="profile-avatar-img">
+      <% } else { %>
+        <div class="profile-avatar-placeholder"><%= (user.displayName || user.username || '?')[0].toUpperCase() %></div>
+      <% } %>
+      <div class="profile-meta">
+        <p class="profile-name"><%= user.displayName || user.username %></p>
+        <p class="profile-platform"><%= user.platform %> · <span class="profile-uuid" title="Din unike ID"><%= user.uuid.slice(0,8) %>...</span></p>
+      </div>
+    </div>
+
+    <form class="profile-form" action="/profile" method="POST">
+
+      <div class="profile-field">
+        <label for="displayName">Visningsnavn</label>
+        <input type="text" id="displayName" name="displayName"
+          value="<%= user.displayName || user.username %>"
+          maxlength="40" placeholder="Hva vil du hete?" required>
+      </div>
+
+      <div class="profile-field">
+        <label>Velg avatar</label>
+        <div class="avatar-choices">
+          <label class="avatar-choice">
+            <input type="radio" name="avatarChoice" value="platform"
+              <%= currentAvatar === 'platform' ? 'checked' : '' %>>
+            <div class="avatar-choice-inner">
+              <% if (user.avatarUrl) { %>
+                <img src="<%= user.avatarUrl %>" alt="Platform avatar" class="avatar-choice-img">
+              <% } else { %>
+                <div class="avatar-choice-placeholder"><%= (user.displayName || user.username || '?')[0].toUpperCase() %></div>
+              <% } %>
+              <span>Standard</span>
+            </div>
+          </label>
+          <label class="avatar-choice">
+            <input type="radio" name="avatarChoice" value="Cosen"
+              <%= currentAvatar === 'Cosen' ? 'checked' : '' %>>
+            <div class="avatar-choice-inner">
+              <img src="/Cosen.png" alt="Cosen" class="avatar-choice-img">
+              <span>Cosen</span>
+            </div>
+          </label>
+          <label class="avatar-choice">
+            <input type="radio" name="avatarChoice" value="Jeppe"
+              <%= currentAvatar === 'Jeppe' ? 'checked' : '' %>>
+            <div class="avatar-choice-inner">
+              <img src="/Jeppe.png" alt="Jeppe" class="avatar-choice-img">
+              <span>Jeppe</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="profile-save-btn">Lagre profil</button>
+    </form>
+  </div>
+
+  <!-- MetaMask wallet-seksjon -->
+  <div class="profile-card wallet-card">
+    <h2 class="wallet-title"><img src="/MetaMaskLogo.png" alt="MetaMask" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;margin-right:8px;">MetaMask-lommebok</h2>
+    <% if (user.walletAddress) { %>
+      <div class="wallet-connected">
+        <span class="wallet-dot connected"></span>
+        <span class="wallet-address" id="wallet-addr"><%= user.walletAddress %></span>
+        <button class="copy-btn" onclick="
+          navigator.clipboard.writeText('<%= user.walletAddress %>');
+          this.textContent = '✅';
+          setTimeout(() => this.textContent = '📋', 1500);
+        " title="Kopier adresse">📋</button>
+        <span class="wallet-badge">Koblet til</span>
+      </div>
+      <p class="wallet-info">Du kan delta i alle challenges, inkludert de med krypto-belønninger.</p>
+
+      <!-- Lommebok-balanser -->
+      <div class="token-balances" id="token-balances">
+        <div class="token-card" id="pol-card" onclick="openPanel('pol')">
+          <img src="/polygon.png" alt="POL" class="token-logo">
+          <div class="token-info">
+            <span class="token-name">POL <span class="live-dot" id="live-dot" title="Oppdateres hvert 8s"></span></span>
+            <span class="token-amount" id="pol-in-usdc">–</span>
+            <span class="token-converted" id="pol-balance"></span>
+          </div>
+        </div>
+        <div class="token-card" id="usdc-card" onclick="openPanel('usdc')">
+          <img src="/usdc-pol.png" alt="USDC" class="token-logo">
+          <div class="token-info">
+            <span class="token-name">USDC</span>
+            <span class="token-amount" id="wallet-usdc-balance">–</span>
+            <span class="token-converted">Polygon Network</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action panel — vises når man klikker på et token-kort -->
+      <div class="action-panel" id="action-panel" style="display:none">
+        <!-- POL-panel -->
+        <div id="panel-pol" style="display:none">
+          <p class="panel-title">POL → USDC</p>
+          <p class="panel-desc">POL brukes til gass på Polygon. For å sette inn i QuestCast må du bytte til USDC via QuickSwap.</p>
+          <a href="https://quickswap.exchange/#/swap?inputCurrency=ETH&outputCurrency=0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359" target="_blank" rel="noopener" class="usdc-btn deposit panel-swap-btn">
+            Bytt POL → USDC på QuickSwap ↗
+          </a>
+        </div>
+
+        <!-- USDC-panel -->
+        <div id="panel-usdc" style="display:none">
+          <p class="panel-title">USDC — Sett inn / Ta ut</p>
+          <div class="usdc-actions">
+            <div class="usdc-input-group">
+              <input type="number" id="deposit-amount" min="0.01" step="0.01" placeholder="Beløp (USDC)" class="usdc-input">
+              <button id="use-max-btn" class="usdc-btn max-btn">Maks</button>
+              <button id="deposit-btn" class="usdc-btn deposit">Sett inn</button>
+            </div>
+            <div class="usdc-input-group">
+              <input type="number" id="withdraw-amount" min="0.01" step="0.01" placeholder="Beløp (USDC)" class="usdc-input">
+              <button id="withdraw-btn" class="usdc-btn withdraw">Ta ut</button>
+            </div>
+          </div>
+          <div id="usdc-status" class="usdc-status"></div>
+        </div>
+      </div>
+
+      <script>
+        const CONTRACT_ADDRESS = '<%= process.env.QUESTCAST_CONTRACT_ADDRESS || "" %>';
+        const USDC_ADDRESS     = '<%= process.env.USDC_CONTRACT_ADDRESS || "" %>';
+        const USER_WALLET      = '<%= user.walletAddress %>';
+
+        let walletUsdcBalance = 0;
+        let polAmount         = 0;
+        let activePanel       = null;
+
+        function openPanel(type) {
+          const panel = document.getElementById('action-panel');
+          if (activePanel === type) {
+            panel.style.display = 'none';
+            activePanel = null;
+            document.getElementById('pol-card').classList.remove('active');
+            document.getElementById('usdc-card').classList.remove('active');
+            return;
+          }
+          activePanel = type;
+          document.getElementById('panel-pol').style.display  = type === 'pol'  ? 'block' : 'none';
+          document.getElementById('panel-usdc').style.display = type === 'usdc' ? 'block' : 'none';
+          panel.style.display = 'block';
+          document.getElementById('pol-card').classList.toggle('active',  type === 'pol');
+          document.getElementById('usdc-card').classList.toggle('active', type === 'usdc');
+        }
+
+        async function loadWalletBalances() {
+          try {
+            const res  = await fetch('/api/wallet-balances?address=' + encodeURIComponent(USER_WALLET));
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            polAmount = parseFloat(data.pol);
+            walletUsdcBalance = parseFloat(data.usdc);
+            document.getElementById('pol-balance').textContent         = data.pol + ' POL';
+            document.getElementById('wallet-usdc-balance').textContent = data.usdc + ' USDC';
+          } catch (e) {
+            console.error('Balanse-feil:', e.message);
+          }
+        }
+
+        async function updatePolPrice() {
+          try {
+            const res  = await fetch('/api/pol-price');
+            const data = await res.json();
+            if (data.error || !data.price) return;
+            document.getElementById('pol-in-usdc').textContent = '≈ ' + (polAmount * data.price).toFixed(2) + ' USDC';
+            // Blink live-dot
+            const dot = document.getElementById('live-dot');
+            dot.classList.add('blink');
+            setTimeout(() => dot.classList.remove('blink'), 600);
+          } catch { /* stille feil */ }
+        }
+
+        async function connectMetaMask() {
+          if (!window.ethereum) throw new Error('MetaMask ikke installert');
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+          if (chainId !== '0x89') {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: '0x89' }],
+            });
+          }
+        }
+
+        function setStatus(msg, ok) {
+          const el = document.getElementById('usdc-status');
+          el.textContent = msg;
+          el.className   = 'usdc-status ' + (ok ? 'ok' : 'err');
+        }
+
+        document.getElementById('use-max-btn').addEventListener('click', () => {
+          document.getElementById('deposit-amount').value = walletUsdcBalance.toFixed(6);
+        });
+
+        document.getElementById('deposit-btn').addEventListener('click', async () => {
+          if (!CONTRACT_ADDRESS) return setStatus('Kontrakt ikke klar ennå.', false);
+          const amount = parseFloat(document.getElementById('deposit-amount').value);
+          if (!amount || amount <= 0) return setStatus('Ugyldig beløp.', false);
+          const amountRaw = BigInt(Math.floor(amount * 1e6)).toString(16).padStart(64, '0');
+          setStatus('Godkjenner USDC...', true);
+          try {
+            await connectMetaMask();
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            await window.ethereum.request({
+              method: 'eth_sendTransaction',
+              params: [{ from: accounts[0], to: USDC_ADDRESS,
+                data: '0x095ea7b3' + CONTRACT_ADDRESS.slice(2).padStart(64, '0') + amountRaw }],
+            });
+            setStatus('Setter inn USDC...', true);
+            await window.ethereum.request({
+              method: 'eth_sendTransaction',
+              params: [{ from: accounts[0], to: CONTRACT_ADDRESS, data: '0xb6b55f25' + amountRaw }],
+            });
+            setStatus('✅ Innskudd sendt!', true);
+            // Vent på blockchain-bekreftelse, så oppdater begge balanser
+            setTimeout(() => {
+              loadWalletBalances();
+              window.dispatchEvent(new Event('questcast:deposit'));
+            }, 8000);
+          } catch (e) { setStatus('Avbrutt: ' + (e.message || e), false); }
+        });
+
+        document.getElementById('withdraw-btn').addEventListener('click', async () => {
+          if (!CONTRACT_ADDRESS) return setStatus('Kontrakt ikke klar ennå.', false);
+          const amount = parseFloat(document.getElementById('withdraw-amount').value);
+          if (!amount || amount <= 0) return setStatus('Ugyldig beløp.', false);
+          const amountRaw = BigInt(Math.floor(amount * 1e6)).toString(16).padStart(64, '0');
+          setStatus('Sender uttak...', true);
+          try {
+            await connectMetaMask();
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            await window.ethereum.request({
+              method: 'eth_sendTransaction',
+              params: [{ from: accounts[0], to: CONTRACT_ADDRESS, data: '0x2e1a7d4d' + amountRaw }],
+            });
+            setStatus('✅ Uttak sendt!', true);
+            setTimeout(loadWalletBalances, 5000);
+          } catch (e) { setStatus('Avbrutt: ' + (e.message || e), false); }
+        });
+
+        loadWalletBalances().then(() => {
+          updatePolPrice();
+          setInterval(updatePolPrice, 8000);
+          // Auto-åpne innskuddspanel etter MetaMask-innlogging
+          if (new URLSearchParams(window.location.search).get('deposit') === '1') {
+            setTimeout(() => {
+              openPanel('usdc');
+              document.getElementById('action-panel')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 400);
+          }
+        });
+
+      </script>
+    <% } else { %>
+      <div class="wallet-connected">
+        <span class="wallet-dot disconnected"></span>
+        <span class="wallet-none">Ingen lommebok koblet til</span>
+      </div>
+      <p class="wallet-info">Koble til MetaMask for å delta i challenges med krypto-belønninger.</p>
+      <button id="link-wallet-btn" class="profile-save-btn wallet-btn">Koble til MetaMask</button>
+      <div id="wallet-error" class="wallet-error" style="display:none"></div>
+
+      <script>
+        document.getElementById('link-wallet-btn').addEventListener('click', async () => {
+          if (!window.ethereum) {
+            document.getElementById('wallet-error').textContent = 'MetaMask ikke installert.';
+            document.getElementById('wallet-error').style.display = 'block';
+            return;
+          }
+          try {
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const res = await fetch('/auth/metamask/link', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ address: accounts[0] }),
+            });
+            const data = await res.json();
+            if (data.ok) window.location.reload();
+            else {
+              document.getElementById('wallet-error').textContent = 'Noe gikk galt: ' + data.error;
+              document.getElementById('wallet-error').style.display = 'block';
+            }
+          } catch {
+            document.getElementById('wallet-error').textContent = 'MetaMask-tilkobling avbrutt.';
+            document.getElementById('wallet-error').style.display = 'block';
+          }
+        });
+      </script>
+    <% } %>
+  </div>
+</div>

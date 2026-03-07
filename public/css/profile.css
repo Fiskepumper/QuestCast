@@ -1,0 +1,510 @@
+/* Profile Page */
+
+.profile-container {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.profile-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 24px;
+  text-shadow: 0 0 16px rgba(0, 255, 204, 0.35);
+}
+
+.profile-success {
+  background: rgba(0, 255, 204, 0.1);
+  border: 1px solid rgba(0, 255, 204, 0.4);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: #00ffcc;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.profile-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 36px;
+  backdrop-filter: blur(10px);
+}
+
+/* Current avatar + name */
+
+.profile-avatar-preview {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 32px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.profile-avatar-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #00ffcc;
+  box-shadow: 0 0 14px rgba(0, 255, 204, 0.3);
+}
+
+.profile-avatar-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00ffcc, #00b3ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #000;
+  flex-shrink: 0;
+}
+
+.profile-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.profile-platform {
+  font-size: 0.85rem;
+  color: #666;
+  text-transform: capitalize;
+}
+
+.profile-uuid {
+  font-family: monospace;
+  color: #444;
+  font-size: 0.8rem;
+  cursor: help;
+}
+
+/* Form fields */
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-field label {
+  display: block;
+  color: #b3b3b3;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.profile-field input[type="text"] {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 12px 16px;
+  color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.25s ease;
+}
+
+.profile-field input[type="text"]:focus {
+  border-color: #00ffcc;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+}
+
+/* Avatar choices */
+
+.avatar-choices {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.avatar-choice {
+  cursor: pointer;
+}
+
+.avatar-choice input[type="radio"] {
+  display: none;
+}
+
+.avatar-choice-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  transition: all 0.25s ease;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #b3b3b3;
+}
+
+.avatar-choice input[type="radio"]:checked + .avatar-choice-inner {
+  border-color: #00ffcc;
+  background: rgba(0, 255, 204, 0.1);
+  box-shadow: 0 0 14px rgba(0, 255, 204, 0.2);
+  color: #00ffcc;
+}
+
+.avatar-choice-inner:hover {
+  border-color: rgba(0, 255, 204, 0.35);
+}
+
+.avatar-choice-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-choice-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00ffcc, #00b3ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #000;
+}
+
+/* Save button */
+
+.profile-save-btn {
+  background: linear-gradient(45deg, #00ffcc, #00b3ff);
+  color: #000;
+  border: none;
+  border-radius: 16px;
+  padding: 13px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+}
+
+.profile-save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(0, 255, 204, 0.55);
+}
+
+/* Wallet card */
+.wallet-card {
+  margin-top: 20px;
+}
+
+.wallet-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.wallet-connected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.wallet-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.wallet-dot.connected    { background: #00ffcc; box-shadow: 0 0 8px #00ffcc; }
+.wallet-dot.disconnected { background: #666; }
+
+.wallet-address {
+  font-family: monospace;
+  color: #00ffcc;
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0 4px;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover { transform: scale(1.2); }
+
+.wallet-none {
+  color: #888;
+  font-size: 0.95rem;
+}
+
+.wallet-badge {
+  background: rgba(0,255,204,0.12);
+  border: 1px solid rgba(0,255,204,0.35);
+  color: #00ffcc;
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.wallet-info {
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.wallet-btn {
+  background: linear-gradient(45deg, #f97316, #fb923c);
+  box-shadow: 0 0 15px rgba(249,115,22,0.3);
+}
+
+.wallet-btn:hover {
+  box-shadow: 0 0 25px rgba(249,115,22,0.55);
+}
+
+.wallet-error {
+  margin-top: 10px;
+  color: #ff6b6b;
+  font-size: 0.85rem;
+}
+
+/* Token balance cards */
+.token-balances {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.token-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  user-select: none;
+}
+
+.token-card:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(0,255,204,0.25);
+}
+
+.token-card.active {
+  border-color: rgba(0,255,204,0.55);
+  background: rgba(0,255,204,0.05);
+}
+
+.token-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.token-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.token-name {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  font-weight: 600;
+}
+
+.token-amount {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.token-converted {
+  font-size: 0.72rem;
+  color: #666;
+}
+
+/* USDC panel */
+.usdc-panel {
+  display: none; /* erstattet av action-panel */
+}
+
+.usdc-balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.usdc-label {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.usdc-amount {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #00ffcc;
+}
+
+.usdc-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.usdc-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.usdc-input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+}
+
+.usdc-input:focus {
+  outline: none;
+  border-color: rgba(0,255,204,0.4);
+}
+
+.usdc-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.usdc-btn.deposit {
+  background: linear-gradient(45deg, #00ffcc, #00b3ff);
+  color: #000;
+}
+
+.usdc-btn.withdraw {
+  background: rgba(255,255,255,0.08);
+  color: #e0e0e0;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.usdc-btn.max-btn {
+  background: rgba(255,255,255,0.06);
+  color: #b3b3b3;
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 10px 12px;
+}
+
+.usdc-btn.max-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+.usdc-btn:hover { transform: translateY(-1px); }
+
+.usdc-status {
+  font-size: 0.85rem;
+  min-height: 20px;
+}
+
+.usdc-status.ok  { color: #00ffcc; }
+.usdc-status.err { color: #ff6b6b; }
+
+/* Action panel — åpnes ved klikk på token-kort */
+.action-panel {
+  margin-top: 10px;
+  background: rgba(0,255,204,0.04);
+  border: 1px solid rgba(0,255,204,0.2);
+  border-radius: 16px;
+  padding: 18px 20px;
+  animation: panelSlide 0.22s ease;
+}
+
+@keyframes panelSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.panel-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #00ffcc;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 10px;
+}
+
+.panel-desc {
+  font-size: 0.82rem;
+  color: #a0a0a0;
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+
+.panel-swap-btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+}
+
+/* Live-dot på POL-kortet */
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00ffcc;
+  margin-left: 5px;
+  vertical-align: middle;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+
+.live-dot.blink {
+  opacity: 1;
+  box-shadow: 0 0 6px #00ffcc;
+}

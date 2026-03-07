@@ -33,7 +33,7 @@ module.exports = {
       uuid: this.uuid,
       title: 'Meet the Team',
       description: 'Folkene bak QuestCast',
-      goal: 3,
+      goal: 4,
       current: collaborators.length,
       unit: 'members',
       participants: collaborators.map(c => ({
