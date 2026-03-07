@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/global.css">
+  <%- style %>
+</head>
+<body>
+  <!-- Global Navbar -->
+  <nav class="global-navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <a href="/">
+          <img src="/QC.png" alt="QuestCast Logo" class="brand-logo">
+        </a>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="/" class="<%= currentPage === 'home' ? 'active' : '' %>">Challenges</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <%- body %>
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="global-footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h4>QuestCast</h4>
+        <p>Live Challenge Registration Platform</p>
+      </div>
+      <div class="footer-section">
+        <h4>Links</h4>
+        <ul>
+          <li><a href="/">Challenges</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; <%= new Date().getFullYear() %> QuestCast. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>

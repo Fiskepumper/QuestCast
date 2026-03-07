@@ -1,0 +1,69 @@
+<div class="container">
+  <div class="header-logo-container">
+    <img src="/QC.png" alt="QuestCast Logo" class="title-logo">
+  </div>
+  <h2>Live Challenge Registration Platform</h2>
+
+  <div class="challenges-section">
+    <h3 class="section-title">Active Challenges</h3>
+
+    <% challenges.forEach(challenge => { %>
+      <% const progress = Math.min(Math.round((challenge.current / challenge.goal) * 100), 100); %>
+      <% const completed = challenge.current >= challenge.goal; %>
+
+      <div class="challenge-card <%= completed ? 'completed' : '' %>" data-uuid="<%= challenge.uuid %>">
+        <div class="challenge-header">
+          <div class="challenge-title-row">
+            <span class="challenge-icon"><%= completed ? '✅' : '⚔️' %></span>
+            <h4><%= challenge.title %></h4>
+            <span class="challenge-badge <%= completed ? 'badge-done' : 'badge-active' %>">
+              <%= completed ? 'Completed' : 'In Progress' %>
+            </span>
+          </div>
+          <p class="challenge-desc"><%= challenge.description %></p>
+        </div>
+
+        <div class="challenge-progress">
+          <div class="progress-labels">
+            <span>Progress</span>
+            <span><%= challenge.current %> / <%= challenge.goal %> <%= challenge.unit %></span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" style="width: <%= progress %>%"></div>
+          </div>
+        </div>
+
+        <% if (challenge.participants && challenge.participants.length > 0) { %>
+          <div class="challenge-participants">
+            <p class="participants-label">Members:</p>
+            <div class="avatars">
+              <% challenge.participants.forEach(p => { %>
+                <% if (p.avatar) { %>
+                  <% if (p.url) { %>
+                    <a href="<%= p.url %>" target="_blank" rel="noopener" title="<%= p.login %>">
+                      <img src="<%= p.avatar %>" alt="<%= p.login %>" class="avatar">
+                    </a>
+                  <% } else { %>
+                    <span title="<%= p.login %>">
+                      <img src="<%= p.avatar %>" alt="<%= p.login %>" class="avatar">
+                    </span>
+                  <% } %>
+                <% } else { %>
+                  <div class="avatar avatar-empty" title="<%= p.login %> (pending)">?</div>
+                <% } %>
+              <% }) %>
+              <% if (challenge.current < challenge.goal) { %>
+                <% const missing = challenge.goal - challenge.participants.length; %>
+                <% for(let i = 0; i < missing; i++) { %>
+                  <div class="avatar avatar-empty" title="Waiting...">?</div>
+                <% } %>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+</div>
+
+<link rel="stylesheet" href="/css/home.css">

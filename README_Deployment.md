@@ -3,9 +3,11 @@
 Enkel guide for å deploye QuestCast til Azure via GitHub.
 
 git add . = Velg hvilke ingredienser/deler som skal med
-git commit = Pakk i boks (lokal snapshot) 📦
+git commit -m "melding" = Pakk i boks med etikett/beskjed 📦
 git pull = Se hva som finnes på bordet fra før
 git push = Send boksen fra PC → GitHub → Azure 🚀
+
+**`-m` = message:** Beskrivelse av hva du endret (f.eks. "Add team section")
 
 ---
 
@@ -68,6 +70,25 @@ git commit -m "Add minimal Node.js Express app for Azure deployment"
 **Hva skjer:** Lager en commit (permanent snapshot) av filene dine **lokalt på din maskin**  
 **Output:** `[main (root-commit) abc1234] Add minimal Node.js...`  
 **Viktig:** Dette er fortsatt bare på din PC, ikke på GitHub ennå!
+
+**Hva er `-m`?**
+- `-m` = "message" (melding/kommentar)
+- Beskriver HVA du endret
+- Alltid bruk `-m "beskjed"` for å unngå editors (Vim)
+
+**Gode commit-meldinger:**
+```bash
+git commit -m "Add team section with profile images"
+git commit -m "Fix background color bug"
+git commit -m "Remove outdated status message"
+```
+
+**Dårlige meldinger:**
+```bash
+git commit -m "update"           # Hva ble oppdatert?
+git commit -m "fikset noe"       # Hva ble fikset?
+git commit -m "asdf"             # 🤷
+```
 
 ---
 
