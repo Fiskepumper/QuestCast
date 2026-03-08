@@ -141,11 +141,13 @@ async function loadChallenges(status = null) {
         const detailResponse = await fetch(`/api/coinflip/${challenge.id}`);
         
         if (!detailResponse.ok) {
-          console.warn(`Failed to load challenge ${challenge.id}`);
+          console.warn(`Failed to load challenge ${challenge.id}: ${detailResponse.status}`);
           continue;
         }
         
         const detail = await detailResponse.json();
+        console.log(`Challenge ${challenge.id} API response:`, detail); // DEBUG
+        
         const card = createChallengeCard(challenge, detail);
         grid.appendChild(card);
       } catch (err) {
