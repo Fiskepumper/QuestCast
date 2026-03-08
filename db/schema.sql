@@ -44,3 +44,70 @@ CREATE TABLE IF NOT EXISTS registrations (
 INSERT INTO registrations (platform, count)
 VALUES ('metamask', 0), ('google', 0), ('microsoft', 0)
 ON CONFLICT (platform) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- BLOCKCHAIN CHALLENGES (Cache for UI - Truth is on-chain)
+-- ═══════════════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS blockchain_challenges (
+  chain_id        BIGINT PRIMARY KEY,  -- ID fra smart contract (or timestamp for virtual)
+  challenge_type  TEXT NOT NULL,        -- 'coinflip', 'sports', etc.
+  status          TEXT NOT NULL,        -- 'open', 'locked', 'settled', 'refunded'
+  name            TEXT NOT NULL,
+  description     TEXT,
+  entry_fee       BIGINT NOT NULL,      -- USDC amount (6 decimals)
+  max_players     INTEGER DEFAULT 2,    -- 2 for 1v1, more for multiplayer
+  total_pot       BIGINT DEFAULT 0,     -- Total pot (after fees)
+  total_fee       BIGINT DEFAULT 0,     -- Total fees collected
+  outcome         TEXT,                 -- 'heads', 'tails', or null
+  creator_uuid    TEXT REFERENCES users(uuid),  -- Who created this challenge
+  creator_address TEXT NOT NULL,        -- Wallet address of creator
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  locked_at       TIMESTAMPTZ,
+  settled_at      TIMESTAMPTZ,
+  tx_hash         TEXT,                 -- Transaction hash for creation
+  contract_addr   TEXT NOT NULL         -- ChallengeHub contract address
+);
+
+CREATE TABLE IF NOT EXISTS coinflip_bets (
+  id              SERIAL PRIMARY KEY,
+  challenge_id    BIGINT NOT NULL REFERENCES blockchain_challenges(chain_id),
+  user_address    TEXT NOT NULL,        -- Wallet address (lowercase)
+  user_uuid       TEXT REFERENCES users(uuid),  -- Optional link to user
+  amount          BIGINT NOT NULL,      -- USDC amount AFTER fee (6 decimals)
+  fee_paid        BIGINT NOT NULL,      -- Fee amount paid
+  choice          TEXT NOT NULL,        -- 'heads' or 'tails'
+  is_creator      BOOLEAN DEFAULT false, -- Is this the challenge creator?
+  claimed         BOOLEAN DEFAULT false,
+  payout          BIGINT,               -- Actual payout if won
+  bet_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  tx_hash         TEXT NOT NULL,        -- Transaction hash
+  UNIQUE (challenge_id, user_address)
+);
+
+-- Index for fast lookups
+CREATE INDEX IF NOT EXISTS idx_challenges_status ON blockchain_challenges(status);
+CREATE INDEX IF NOT EXISTS idx_challenges_type ON blockchain_challenges(challenge_type);
+CREATE INDEX IF NOT EXISTS idx_challenges_creator ON blockchain_challenges(creator_uuid);
+CREATE INDEX IF NOT EXISTS idx_bets_challenge ON coinflip_bets(challenge_id);
+CREATE INDEX IF NOT EXISTS idx_bets_user ON coinflip_bets(user_address);
+CREATE INDEX IF NOT EXISTS idx_bets_user_uuid ON coinflip_bets(user_uuid);
+
+-- Migrate existing tables to BIGINT (safe to run multiple times)
+DO $$ 
+BEGIN
+  -- Change chain_id to BIGINT if it's not already
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'blockchain_challenges' 
+    AND column_name = 'chain_id' 
+    AND data_type = 'integer'
+  ) THEN
+    ALTER TABLE coinflip_bets DROP CONSTRAINT IF EXISTS coinflip_bets_challenge_id_fkey;
+    ALTER TABLE blockchain_challenges ALTER COLUMN chain_id TYPE BIGINT;
+    ALTER TABLE coinflip_bets ALTER COLUMN challenge_id TYPE BIGINT;
+    ALTER TABLE coinflip_bets ADD CONSTRAINT coinflip_bets_challenge_id_fkey 
+      FOREIGN KEY (challenge_id) REFERENCES blockchain_challenges(chain_id);
+    RAISE NOTICE 'Migrated chain_id to BIGINT';
+  END IF;
+END $$;

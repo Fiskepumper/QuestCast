@@ -9,6 +9,7 @@
   z-index: 2000;
   justify-content: center;
   align-items: center;
+  padding: 0 16px;
 }
 
 .modal-overlay.open {
@@ -27,6 +28,7 @@
   animation: modalIn 0.25s ease;
   max-height: 90vh;
   overflow-y: auto;
+  margin: 0 auto;
 }
 
 @keyframes modalIn {
@@ -293,10 +295,40 @@
   box-shadow: 0 0 25px rgba(0, 255, 204, 0.55);
 }
 
-@media (max-width: 500px) {
+@media (max-width: 768px) {
   .modal-box {
-    padding: 40px 20px 28px;
-    margin: 16px;
+    padding: 32px 24px 24px;
+    max-width: calc(100% - 32px);
+    border-radius: 20px;
+  }
+  
+  .modal-title {
+    font-size: 1.5rem;
+  }
+  
+  .oauth-btn {
+    padding: 14px 18px;
+    font-size: 0.9rem;
+  }
+  
+  .platform-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-box {
+    padding: 28px 20px 20px;
+    max-width: calc(100% - 24px);
+  }
+  
+  .modal-title {
+    font-size: 1.3rem;
+  }
+  
+  .oauth-icon {
+    width: 24px;
+    height: 24px;
   }
 }
   display: none;

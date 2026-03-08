@@ -1,0 +1,146 @@
+<!-- Coin Flip Challenges - 1v1 Matching -->
+<div class="coinflip-container">
+  <div class="page-header">
+    <h1>🪙 Coin Flip - 1v1 Betting</h1>
+    <p>Challenge andre spillere til Heads vs Tails. Winner takes all! 💰</p>
+  </div>
+
+  <!-- Wallet Info -->
+  <div class="wallet-panel" id="walletPanel">
+    <div class="wallet-disconnected" id="walletDisconnected">
+      <p>🔗 Logg inn for å delta</p>
+    </div>
+    
+    <div class="wallet-connected" id="walletConnected" style="display: none;">
+      <div class="wallet-info">
+        <span class="wallet-address" id="walletAddress"></span>
+        <div class="wallet-balance">
+          <span id="usdcBalance">0.00</span> USDC
+          <small style="opacity:0.7">(deposited)</small>
+        </div>
+      </div>
+      <button id="createChallengeBtn" class="btn btn-primary">➕ Create Challenge</button>
+    </div>
+  </div>
+
+  <!-- Challenge Filter -->
+  <div class="challenge-filters">
+    <button class="filter-btn active" data-status="all">Alle</button>
+    <button class="filter-btn" data-status="open">Venter på opponent</button>
+    <button class="filter-btn" data-status="locked">Full (Locked)</button>
+    <button class="filter-btn" data-status="settled">Avsluttet</button>
+  </div>
+
+  <!-- Challenges Liste -->
+  <div class="challenges-grid" id="challengesGrid">
+    <div class="loading">Laster challenges...</div>
+  </div>
+
+  <!-- Create Challenge Modal -->
+  <div id="createModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeCreateModal()">&times;</span>
+      <h2>🎲 Create 1v1 Challenge</h2>
+      
+      <form id="createForm">
+        <div class="form-group">
+          <label>Bet Amount (USDC):</label>
+          <div class="balance-info" style="margin-bottom: 10px; padding: 10px; background: rgba(0,255,204,0.1); border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span>Your Balance:</span>
+              <strong id="modalBalance">0.00 USDC</strong>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="number" id="createAmount" step="0.01" min="0.01" placeholder="Enter amount" required style="flex: 1; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0,255,204,0.3); border-radius: 8px; color: white; font-size: 16px;">
+            <button type="button" id="maxAmountBtn" style="padding: 12px 24px; background: rgba(0,255,204,0.2); border: 1px solid rgba(0,255,204,0.5); border-radius: 8px; color: #00ffcc; font-weight: bold; cursor: pointer; white-space: nowrap;">MAX</button>
+          </div>
+          <small>Din opponent må matche dette beløpet</small>
+        </div>
+
+        <div class="form-group">
+          <label>Your Side:</label>
+          <div class="choice-buttons">
+            <button type="button" class="choice-btn" data-choice="heads">
+              <img src="/Kron.png" alt="Heads" style="width: 60px; height: 60px; margin-bottom: 8px;">
+              <span>Kron</span>
+            </button>
+            <button type="button" class="choice-btn" data-choice="tails">
+              <img src="/Mynt.png" alt="Tails" style="width: 60px; height: 60px; margin-bottom: 8px;">
+              <span>Mynt</span>
+            </button>
+          </div>
+          <input type="hidden" id="createChoice" required>
+        </div>
+
+        <div class="fee-info">
+          <p>⚠️ 2% platform fee (goes to developer)</p>
+          <p>Total cost: <strong><span id="totalCost">0</span> USDC</strong></p>
+          <p>Into pot: <strong><span id="intoPot">0</span> USDC</strong></p>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-large">Create & Place Bet</button>
+        <div class="status-message" id="createStatus"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Join Challenge Modal -->
+  <div id="joinModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeJoinModal()">&times;</span>
+      <h2>⚡ Join Challenge</h2>
+      
+      <div class="challenge-summary">
+        <h3 id="joinChallengeName"></h3>
+        <div class="creator-info">
+          <span>Created by opponent</span>
+        </div>
+      </div>
+
+      <div class="match-details">
+        <div class="detail-row">
+          <span>Bet Amount:</span>
+          <strong id="joinAmount">0 USDC</strong>
+        </div>
+        <div class="detail-row">
+          <span>Opponent chose:</span>
+          <strong id="joinCreatorChoice">-</strong>
+        </div>
+        <div class="detail-row">
+          <span>You will bet:</span>
+          <strong id="joinYourChoice">-</strong>
+        </div>
+        <div class="detail-row fee-row">
+          <span>2% fee:</span>
+          <strong id="joinFee">0 USDC</strong>
+        </div>
+      </div>
+
+      <form id="joinForm">
+        <input type="hidden" id="joinChallengeId">
+        <button type="submit" class="btn btn-primary btn-large">Accept Challenge</button>
+        <div class="status-message" id="joinStatus"></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="/css/coinflip.css">
+
+<script>
+  // Config from backend
+  window.CURRENT_USER_UUID = '<%= typeof currentUser !== "undefined" && currentUser ? currentUser.uuid : "" %>';
+</script>
+
+<script src="/js/coinflip-1v1.js"></script>
+
+<script>
+  // Initialize page
+  document.addEventListener('DOMContentLoaded', () => {
+    loadChallenges();
+    setupWallet();
+    setupFilters();
+    setupCreateModal();
+  });
+</script>

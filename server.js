@@ -203,6 +203,20 @@ app.get('/api/pol-price', async (req, res) => {
   }
 });
 
+// Get current logged in user info
+app.get('/api/user/me', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.json({ error: 'Not authenticated' });
+  }
+  res.json({
+    uuid: req.user.uuid,
+    username: req.user.username,
+    walletAddress: req.user.walletAddress,
+    email: req.user.email,
+    platform: req.user.platform
+  });
+});
+
 // Profile page
 app.get('/profile', (req, res) => {
   if (!req.isAuthenticated()) return res.redirect('/?error=login-required');
@@ -212,6 +226,37 @@ app.get('/profile', (req, res) => {
     user: req.user,
     saved: req.query.saved === '1'
   });
+});
+
+// Coin Flip page
+app.get('/coinflip', (req, res) => {
+  res.render('coinflip/index', {
+    title: 'QuestCast - Coin Flip',
+    currentPage: 'coinflip',
+    challengeHubAddress: process.env.CHALLENGE_HUB_ADDRESS || '',
+    usdcAddress: process.env.USDC_CONTRACT_ADDRESS || '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'
+  });
+});
+
+// Admin Coin Flip page
+app.get('/admin/coinflip', (req, res) => {
+  res.render('admin/coinflip', {
+    title: 'QuestCast - Admin Panel',
+    currentPage: 'admin',
+    layout: false  // No layout for admin
+  });
+});
+
+// Admin verification endpoint
+app.post('/admin/verify', (req, res) => {
+  const { secret } = req.body;
+  const adminSecret = process.env.ADMIN_SECRET || 'admin123';
+  
+  if (secret === adminSecret) {
+    res.json({ ok: true });
+  } else {
+    res.json({ ok: false });
+  }
 });
 
 app.post('/profile', async (req, res) => {
@@ -302,6 +347,39 @@ if (process.env.MICROSOFT_CLIENT_ID) {
 } else {
   app.get('/auth/microsoft', (req, res) => res.redirect('/?error=not-configured'));
 }
+
+// Logout route
+app.get('/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+      return res.redirect('/');
+    }
+    req.session.destroy((err) => {
+      if (err) console.error('Session destroy error:', err);
+      res.redirect('/');
+    });
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// COINFLIP CHALLENGE API (Virtual betting with deposited balance)
+// ═══════════════════════════════════════════════════════════════════
+
+const coinflipSimple = require('./challenges/coinflip-simple');
+const coinflipSettle = require('./challenges/coinflip-settle');
+
+// User endpoints
+app.post('/api/coinflip/create', coinflipSimple.createChallenge);
+app.post('/api/coinflip/:id/join', coinflipSimple.joinChallenge);
+app.post('/api/coinflip/:id/claim', coinflipSimple.claimPrize);
+
+// Public endpoints
+app.get('/api/coinflip/list', coinflipSimple.listChallenges);
+app.get('/api/coinflip/:id', coinflipSimple.getChallenge);
+
+// Admin endpoint
+app.post('/api/coinflip/:id/settle', coinflipSettle.settleChallenge);
 
 // Health check endpoint (nyttig for Azure monitoring)
 app.get('/health', (req, res) => {

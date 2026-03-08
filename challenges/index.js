@@ -4,6 +4,7 @@ const challenges = [
   require('./microsoft-registrations'),
   require('./github-profiles'),
   require('./meet-the-team'),
+  require('./coinflip-challenge'), // 1v1 betting system
 ];
 
 async function getAllChallenges() {

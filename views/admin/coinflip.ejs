@@ -1,0 +1,124 @@
+<!-- Admin Panel for Coin Flip Challenges -->
+<div class="admin-container">
+  <div class="page-header">
+    <h1>🎮 Admin Panel - Coin Flip</h1>
+    <p>Administrer challenges, lås betting, og sett utfall</p>
+  </div>
+
+  <!-- Admin Auth Check -->
+  <div class="admin-auth" id="adminAuth">
+    <div class="auth-box">
+      <h3>🔐 Admin Access</h3>
+      <p>Enter admin secret to access control panel</p>
+      <input type="password" id="adminSecret" placeholder="Admin secret">
+      <button onclick="verifyAdmin()" class="btn btn-primary">Unlock</button>
+    </div>
+  </div>
+
+  <!-- Admin Controls -->
+  <div class="admin-controls" id="adminControls" style="display: none;">
+    
+    <!-- Create New Challenge -->
+    <div class="admin-section">
+      <h2>➕ Create New Challenge</h2>
+      <form id="createChallengeForm" class="admin-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Name:</label>
+            <input type="text" id="challengeName" placeholder="e.g., Friday Night Flip" required>
+          </div>
+          <div class="form-group">
+            <label>Entry Fee (USDC):</label>
+            <input type="number" id="entryFee" step="0.01" min="0" placeholder="0 = no minimum" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description:</label>
+          <textarea id="challengeDesc" placeholder="Optional description"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Challenge</button>
+        <div class="status-message" id="createStatus"></div>
+      </form>
+    </div>
+
+    <!-- Manage Existing Challenges -->
+    <div class="admin-section">
+      <h2>📋 Manage Challenges</h2>
+      <button onclick="loadAdminChallenges()" class="btn btn-secondary">🔄 Refresh List</button>
+      
+      <div class="challenges-table">
+        <table id="challengesTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Total Pot</th>
+              <th>Heads</th>
+              <th>Tails</th>
+              <th>Participants</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="challengesTableBody">
+            <tr><td colspan="8">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Settlement Modal -->
+    <div id="settleModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeSettleModal()">&times;</span>
+        <h2>🎲 Settle Challenge</h2>
+        
+        <div class="settle-info">
+          <h3 id="settleName"></h3>
+          <div class="pot-summary">
+            <div class="pot-item">
+              <span class="pot-label">👑 Heads:</span>
+              <span class="pot-value" id="settleHeads">0 USDC</span>
+            </div>
+            <div class="pot-item">
+              <span class="pot-label">⚔️ Tails:</span>
+              <span class="pot-value" id="settleTails">0 USDC</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="settle-form">
+          <h4>Select Winner:</h4>
+          <input type="hidden" id="settleChallengeId">
+          
+          <div class="outcome-buttons">
+            <button onclick="settleChallenge('heads')" class="btn btn-large btn-heads">
+              👑 HEADS WINS
+            </button>
+            <button onclick="settleChallenge('tails')" class="btn btn-large btn-tails">
+              ⚔️ TAILS WINS
+            </button>
+          </div>
+          
+          <div class="status-message" id="settleStatus"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<link rel="stylesheet" href="/css/admin.css">
+<script src="/js/admin-coinflip.js"></script>
+
+<script>
+  // Auto-load challenges when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check if admin is already authenticated (localStorage)
+    const isAdmin = localStorage.getItem('adminAuth');
+    if (isAdmin === 'true') {
+      showAdminControls();
+      loadAdminChallenges();
+    }
+  });
+</script>

@@ -20,7 +20,20 @@
           <img src="/QC.png" alt="QuestCast Logo" class="brand-logo">
         </a>
       </div>
-      <ul class="nav-menu">
+      
+      <!-- Mobile Hamburger -->
+      <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <!-- Mobile Overlay -->
+      <div class="nav-overlay" id="navOverlay"></div>
+      
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="/" class="nav-link">Home</a></li>
+        <li><a href="/coinflip" class="nav-link">Coinflip</a></li>
         <% if (locals.currentUser) { %>
           <li style="display:flex;align-items:center;gap:10px;">
             <a href="/profile" class="nav-profile-btn">
@@ -59,13 +72,45 @@
               })();
             </script>
             <% } %>
+            <a href="/logout" class="nav-link" style="color: rgba(255,255,255,0.7); font-size: 14px; margin-left: 15px;">Logg ut</a>
           </li>
         <% } else { %>
-          <li><button class="nav-connect-btn" onclick="document.getElementById('signup-modal').classList.add('open')">Sign Up</button></li>
+          <li><button class="nav-connect-btn" onclick="document.getElementById('signup-modal').classList.add('open')">Sign In</button></li>
         <% } %>
       </ul>
     </div>
   </nav>
+
+  <script>
+    // Mobile menu toggle
+    const hamburger = document.getElementById('navHamburger');
+    const navMenu = document.getElementById('navMenu');
+    const navOverlay = document.getElementById('navOverlay');
+    
+    if (hamburger) {
+      hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
+        navOverlay.classList.toggle('active');
+      });
+      
+      // Close menu when clicking overlay
+      navOverlay.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+        navOverlay.classList.remove('active');
+      });
+      
+      // Close menu when clicking on a link
+      document.querySelectorAll('.nav-menu a, .nav-menu button').forEach(link => {
+        link.addEventListener('click', () => {
+          hamburger.classList.remove('active');
+          navMenu.classList.remove('active');
+          navOverlay.classList.remove('active');
+        });
+      });
+    }
+  </script>
 
   <!-- Sign Up Modal -->
   <div class="modal-overlay" id="signup-modal" onclick="if(event.target===this)this.classList.remove('open')">
