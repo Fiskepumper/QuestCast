@@ -13,6 +13,7 @@ const CHALLENGE_HUB_ADDRESS = '0x4377a75104E29b43f8bE89dF12Aa1ed01Ac5F39B';
 const USDC_CONTRACT = '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359';
 
 const CHALLENGE_HUB_ABI = [
+  // Functions
   "function deposit(uint256 amount) external",
   "function withdraw(uint256 amount) external",
   "function getBalance(address user) external view returns (uint256)",
@@ -20,7 +21,14 @@ const CHALLENGE_HUB_ABI = [
   "function joinCoinFlip(uint256 challengeId, bool isHeads) external",
   "function claimPrize(uint256 challengeId) external",
   "function challenges(uint256) external view returns (uint256 id, uint8 challengeType, uint8 status, string name, string description, uint256 entryFee, uint256 maxPlayers, address creator, uint256 createdAt, uint256 lockedAt, uint256 settledAt, bytes32 outcome, uint256 totalPot, uint256 totalFeeCollected)",
-  "function coinFlipBets(uint256 challengeId, address user) external view returns (uint256 amount, bool isHeads, bool claimed)"
+  "function coinFlipBets(uint256 challengeId, address user) external view returns (uint256 amount, bool isHeads, bool claimed)",
+  
+  // Events
+  "event ChallengeCreated(uint256 indexed id, uint8 challengeType, string name, uint256 entryFee)",
+  "event BetPlaced(uint256 indexed challengeId, address indexed user, uint256 amount, bytes32 betData)",
+  "event ChallengeLocked(uint256 indexed challengeId, uint256 lockedAt)",
+  "event ChallengeSettled(uint256 indexed challengeId, bytes32 outcome)",
+  "event PrizeClaimed(uint256 indexed challengeId, address indexed user, uint256 amount)"
 ];
 
 const USDC_ABI = [
@@ -206,35 +214,50 @@ async function createChallengeOnChain(params) {
     const createReceipt = await createTx.wait();
 
     // Get challenge ID from event (ethers v6 approach)
-    console.log('🔍 Parsing transaction receipt...', createReceipt);
+    console.log('🔍 Parsing transaction receipt...');
+    console.log('📦 Total logs:', createReceipt.logs.length);
+    console.log('📍 ChallengeHub address:', CHALLENGE_HUB_ADDRESS.toLowerCase());
+    
     let challengeId = null;
     
-    for (const log of createReceipt.logs) {
+    for (let i = 0; i < createReceipt.logs.length; i++) {
+      const log = createReceipt.logs[i];
+      console.log(`\n📄 Log ${i}:`);
+      console.log('  Address:', log.address.toLowerCase());
+      console.log('  Topics:', log.topics);
+      console.log('  Data length:', log.data.length);
+      console.log('  Match?', log.address.toLowerCase() === CHALLENGE_HUB_ADDRESS.toLowerCase());
+      
+      // Only try to parse logs from our contract
+      if (log.address.toLowerCase() !== CHALLENGE_HUB_ADDRESS.toLowerCase()) {
+        console.log('  ⏭️ Skipping - different contract');
+        continue;
+      }
+      
       try {
         // Try to decode the log using our contract interface
         const parsedLog = challengeHubContract.interface.parseLog({
-          topics: [...log.topics],
+          topics: log.topics,
           data: log.data
         });
         
-        console.log('📝 Parsed log:', parsedLog);
+        console.log('  ✅ Parsed event:', parsedLog ? parsedLog.name : 'null');
         
         if (parsedLog && parsedLog.name === 'ChallengeCreated') {
           // In ethers v6, args is an object with named properties
           challengeId = parsedLog.args.id || parsedLog.args[0];
           challengeId = challengeId.toString();
-          console.log('✅ Found challenge ID:', challengeId);
+          console.log('  🎯 Challenge ID:', challengeId);
           break;
         }
       } catch (e) {
-        // Skip logs that don't match our interface
+        console.log('  ❌ Parse failed:', e.message);
         continue;
       }
     }
 
     if (!challengeId) {
-      console.error('❌ Could not find ChallengeCreated event in receipt');
-      console.error('Receipt logs:', createReceipt.logs);
+      console.error('\n❌ Could not find ChallengeCreated event');
       throw new Error('Failed to get challenge ID from transaction receipt');
     }
 
