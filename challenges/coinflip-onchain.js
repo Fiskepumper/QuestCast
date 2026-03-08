@@ -182,6 +182,7 @@ async function listChallenges(req, res) {
  * Get challenge details from blockchain
  */
 async function getChallenge(req, res) {
+  // Convert challengeId to BigInt for blockchain, keep as string for SQL queries
   const challengeId = req.params.id;
 
   try {
@@ -203,6 +204,7 @@ async function getChallenge(req, res) {
     }
 
     // Hent bets fra database med displayName
+    // Cast challengeId to bigint in SQL to avoid type mismatch
     const betsResult = await pool.query(`
       SELECT 
         cb.*,
@@ -211,7 +213,7 @@ async function getChallenge(req, res) {
         LOWER(cb.user_address) = LOWER($1) as is_creator
       FROM coinflip_bets cb
       LEFT JOIN users u ON LOWER(u.wallet_address) = LOWER(cb.user_address)
-      WHERE cb.challenge_id = $1
+      WHERE cb.challenge_id = $1::bigint
       ORDER BY cb.placed_at ASC
     `, [challengeId]);
 
