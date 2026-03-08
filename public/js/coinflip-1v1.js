@@ -191,7 +191,7 @@ function createChallengeCard(challenge, detail) {
   const bets = detail.challenge?.bets || [];
   
   const statusClass = `status-${challenge.status}`;
-  const amount = (parseInt(challenge.entryFee) / 1e6).toFixed(2);
+  const amount = parseFloat(challenge.entryFee).toFixed(2); // Backend already converts to USDC
   const participantCount = bets.length;
   const needsOpponent = challenge.status === 'open' && participantCount < 2;
   
