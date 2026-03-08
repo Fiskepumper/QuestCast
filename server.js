@@ -363,24 +363,23 @@ app.get('/logout', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// COINFLIP CHALLENGE API (Virtual betting with deposited balance)
+// COINFLIP CHALLENGE API (On-chain betting via ChallengeHub)
 // ═══════════════════════════════════════════════════════════════════
 
-const coinflipSimple = require('./challenges/coinflip-simple');
-const coinflipSettle = require('./challenges/coinflip-settle');
+const coinflipOnchain = require('./challenges/coinflip-onchain');
 
 // User endpoints
-app.post('/api/coinflip/create', coinflipSimple.createChallenge);
-app.post('/api/coinflip/:id/join', coinflipSimple.joinChallenge);
-app.post('/api/coinflip/:id/claim', coinflipSimple.claimPrize);
-app.get('/api/coinflip/balance', coinflipSimple.getBalance);
+app.get('/api/coinflip/balance', coinflipOnchain.getBalance);
+app.post('/api/coinflip/create', coinflipOnchain.createChallenge);
 
 // Public endpoints
-app.get('/api/coinflip/list', coinflipSimple.listChallenges);
-app.get('/api/coinflip/:id', coinflipSimple.getChallenge);
+app.get('/api/coinflip/list', coinflipOnchain.listChallenges);
+app.get('/api/coinflip/:id', coinflipOnchain.getChallenge);
 
-// Admin endpoint
-app.post('/api/coinflip/:id/settle', coinflipSettle.settleChallenge);
+// NOTE: Join, claim, and settle are handled ON-CHAIN by users via MetaMask
+// - Join: contract.joinCoinFlip(challengeId, isHeads) from frontend
+// - Claim: contract.claimPrize(challengeId) from frontend
+// - Settle: Auto-handled by services/coinflip-oracle.js (Backend Oracle)
 
 // Health check endpoint (nyttig for Azure monitoring)
 app.get('/health', (req, res) => {

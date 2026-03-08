@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "oracle": "node services/coinflip-oracle.js",
+    "sync": "node services/event-sync.js"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -20,6 +22,7 @@
   "dependencies": {
     "dotenv": "^17.3.1",
     "ejs": "^5.0.1",
+    "ethers": "^6.13.0",
     "express": "^4.18.2",
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.19.0",

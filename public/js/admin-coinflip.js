@@ -253,7 +253,7 @@ async function settleChallenge(outcome) {
   const id = document.getElementById('settleChallengeId').value;
   const status = document.getElementById('settleStatus');
   
-  if (!confirm(`Are you sure ${outcome.toUpperCase()} won? This CANNOT be undone!`)) {
+  if (!confirm(`Er du sikker på at ${outcome.toUpperCase()} vant? Dette CANNOT be undone!`)) {
     return;
   }
   

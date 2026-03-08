@@ -160,8 +160,8 @@ function createChallengeCard(challenge, detail) {
       <div class="detail-item">
         <span class="detail-label">Creator chose:</span>
         <span class="detail-value">
-          <img src="/${creatorChoice === 'heads' ? 'Kron' : 'Mynt'}.png" alt="${creatorChoice}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
-          ${creatorChoice === 'heads' ? 'Kron' : 'Mynt'}
+          <img src="/${creatorChoice === 'kron' ? 'Kron' : 'Mynt'}.png" alt="${creatorChoice}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
+          ${creatorChoice === 'kron' ? 'Kron' : 'Mynt'}
         </span>
       </div>
       ` : ''}
@@ -181,8 +181,8 @@ function createChallengeCard(challenge, detail) {
     
     ${challenge.status === 'settled' && challenge.outcome ? `
       <div class="challenge-outcome">
-        Winner: <img src="/${challenge.outcome === 'heads' ? 'Kron' : 'Mynt'}.png" alt="${challenge.outcome}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
-        ${challenge.outcome === 'heads' ? 'Kron' : 'Mynt'}
+        Winner: <img src="/${challenge.outcome === 'kron' ? 'Kron' : 'Mynt'}.png" alt="${challenge.outcome}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
+        ${challenge.outcome === 'kron' ? 'Kron' : 'Mynt'}
         ${userBet && !userBet.claimed && isWinner(userBet, challenge.outcome) ? `
           <button class="btn btn-success" onclick="claimPrize(${challenge.id})">
             Claim Prize
@@ -196,8 +196,8 @@ function createChallengeCard(challenge, detail) {
 }
 
 function isWinner(bet, outcome) {
-  return (bet.choice === 'heads' && outcome === 'heads') ||
-         (bet.choice === 'tails' && outcome === 'tails');
+  return (bet.choice === 'kron' && outcome === 'kron') ||
+         (bet.choice === 'mynt' && outcome === 'mynt');
 }
 
 // ═══════════════════════════════════════════════════════════════════
