@@ -88,8 +88,8 @@ async function handleChallengeCreated(challengeId, challengeType, name, entryFee
     await pool.query(`
       INSERT INTO blockchain_challenges (
         chain_id, challenge_type, status, name, entry_fee, 
-        max_players, creator_address, created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, to_timestamp($8))
+        max_players, creator_address, created_at, contract_addr
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, to_timestamp($8), $9)
       ON CONFLICT (chain_id) DO NOTHING
     `, [
       challengeId.toString(),
@@ -99,7 +99,8 @@ async function handleChallengeCreated(challengeId, challengeType, name, entryFee
       cEntryFee.toString(),
       Number(maxPlayers),
       creator.toLowerCase(),
-      Number(createdAt)
+      Number(createdAt),
+      CHALLENGE_HUB_ADDRESS.toLowerCase()
     ]);
 
     console.log('   ✅ Synced to database');
