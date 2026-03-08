@@ -88,6 +88,9 @@ async function updateBalance() {
       const blockchainBalance = await window.ChallengeHub.getInternalBalance();
       depositedBalance = parseFloat(blockchainBalance);
       document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
+      
+      // Notify navbar to update
+      window.dispatchEvent(new Event('questcast:balance-updated'));
       return;
     } catch (blockchainError) {
       console.warn('Blockchain balance fetch failed, falling back to API:', blockchainError);
@@ -99,6 +102,9 @@ async function updateBalance() {
     
     depositedBalance = parseFloat(data.usdc || '0');
     document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
+    
+    // Notify navbar to update
+    window.dispatchEvent(new Event('questcast:balance-updated'));
   } catch (error) {
     console.error('Balance error:', error);
   }
@@ -384,6 +390,9 @@ async function handleCreateSubmit(e) {
     depositedBalance = parseFloat(newBalance);
     document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
     
+    // Notify navbar to update
+    window.dispatchEvent(new Event('questcast:balance-updated'));
+    
     setTimeout(() => {
       closeCreateModal();
       loadChallenges(currentFilter);
@@ -558,6 +567,9 @@ document.getElementById('depositForm')?.addEventListener('submit', async (e) => 
     depositedBalance = parseFloat(newBalance);
     document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
     
+    // Notify navbar to update
+    window.dispatchEvent(new Event('questcast:balance-updated'));
+    
     setTimeout(() => {
       document.getElementById('depositModal').classList.remove('show');
       document.getElementById('depositForm').reset();
@@ -601,6 +613,9 @@ document.getElementById('withdrawForm')?.addEventListener('submit', async (e) =>
     const newBalance = await window.ChallengeHub.getInternalBalance();
     depositedBalance = parseFloat(newBalance);
     document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
+    
+    // Notify navbar to update
+    window.dispatchEvent(new Event('questcast:balance-updated'));
     
     setTimeout(() => {
       document.getElementById('withdrawModal').classList.remove('show');

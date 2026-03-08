@@ -59,6 +59,18 @@
                 const addr = <%- JSON.stringify(currentUser.walletAddress) %>;
                 async function fetchNavBalance() {
                   try {
+                    // First try: Use blockchain directly if MetaMask is connected (most accurate)
+                    if (typeof window.ChallengeHub !== 'undefined' && window.ChallengeHub.getInternalBalance) {
+                      try {
+                        const balance = await window.ChallengeHub.getInternalBalance();
+                        document.getElementById('nav-usdc-amount').textContent = parseFloat(balance).toFixed(2) + ' USDC';
+                        return;
+                      } catch (e) {
+                        console.log('Navbar: blockchain balance failed, using API fallback');
+                      }
+                    }
+                    
+                    // Fallback: Use backend API
                     const r = await fetch('/api/contract-balance?address=' + encodeURIComponent(addr));
                     const d = await r.json();
                     if (!d.error) document.getElementById('nav-usdc-amount').textContent = d.usdc + ' USDC';
@@ -69,6 +81,8 @@
                 setInterval(fetchNavBalance, 30000);
                 // Lytt på deposit-event fra profilsiden
                 window.addEventListener('questcast:deposit', fetchNavBalance);
+                // Lytt på balance update fra coinflip siden
+                window.addEventListener('questcast:balance-updated', fetchNavBalance);
               })();
             </script>
             <% } %>
