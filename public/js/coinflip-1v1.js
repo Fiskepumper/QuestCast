@@ -19,19 +19,9 @@ const CURRENT_USER_UUID = window.CURRENT_USER_UUID || '';
 
 async function setupWallet() {
   const createBtn = document.getElementById('createChallengeBtn');
-  const depositBtn = document.getElementById('depositBtn');
-  const withdrawBtn = document.getElementById('withdrawBtn');
   
   if (createBtn) {
     createBtn.addEventListener('click', openCreateModal);
-  }
-  
-  if (depositBtn) {
-    depositBtn.addEventListener('click', openDepositModal);
-  }
-  
-  if (withdrawBtn) {
-    withdrawBtn.addEventListener('click', openWithdrawModal);
   }
   
   // Check if user is logged in (has wallet address from session)
@@ -221,6 +211,12 @@ function createChallengeCard(challenge, detail) {
     </div>
     
     <div class="challenge-details">
+      ${challenge.creatorName ? `
+      <div class="detail-item">
+        <span class="detail-label">Created by:</span>
+        <span class="detail-value">${challenge.creatorName}</span>
+      </div>
+      ` : ''}
       <div class="detail-item">
         <span class="detail-label">Bet Amount:</span>
         <span class="detail-value">${amount} USDC</span>
@@ -254,11 +250,22 @@ function createChallengeCard(challenge, detail) {
     
     ${challenge.status === 'settled' && challenge.outcome ? `
       <div class="challenge-outcome">
-        Winner: <img src="/${challenge.outcome === 'kron' ? 'Kron' : 'Mynt'}.png" alt="${challenge.outcome}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
-        ${challenge.outcome === 'kron' ? 'Kron' : 'Mynt'}
+        ${(() => {
+          const winnerBet = detail.bets.find(b => b.choice === challenge.outcome);
+          const winnerName = winnerBet ? winnerBet.user_name : 'Unknown';
+          return `
+            <div style="margin-bottom: 10px;">
+              🏆 Winner: <strong>${winnerName}</strong>
+            </div>
+            <div>
+              Winning side: <img src="/${challenge.outcome === 'kron' ? 'Kron' : 'Mynt'}.png" alt="${challenge.outcome}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
+              ${challenge.outcome === 'kron' ? 'Kron' : 'Mynt'}
+            </div>
+          `;
+        })()}
         ${userBet && !userBet.claimed && isWinner(userBet, challenge.outcome) ? `
-          <button class="btn btn-success" onclick="claimPrize(${challenge.id})">
-            Claim Prize
+          <button class="btn btn-success" onclick="claimPrize(${challenge.id})" style="margin-top: 10px;">
+            💰 Claim Prize
           </button>
         ` : ''}
       </div>
@@ -527,108 +534,6 @@ async function claimPrize(challengeId) {
 // ═══════════════════════════════════════════════════════════════════
 // DEPOSIT & WITHDRAW
 // ═══════════════════════════════════════════════════════════════════
-
-function openDepositModal() {
-  document.getElementById('depositModal').classList.add('show');
-}
-
-function openWithdrawModal() {
-  document.getElementById('withdrawAvailable').textContent = depositedBalance.toFixed(2) + ' USDC';
-  document.getElementById('withdrawModal').classList.add('show');
-  
-  // Setup max button
-  document.getElementById('withdrawMaxBtn').onclick = () => {
-    document.getElementById('withdrawAmount').value = depositedBalance.toFixed(2);
-  };
-}
-
-// Deposit form handler
-document.getElementById('depositForm')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const amount = document.getElementById('depositAmount').value;
-  const status = document.getElementById('depositStatus');
-  
-  try {
-    status.className = 'status-message loading show';
-    status.textContent = '⏳ Step 1: Approving USDC...';
-    
-    const success = await window.ChallengeHub.depositUSDC(amount);
-    
-    if (!success) {
-      throw new Error('Deposit failed');
-    }
-    
-    status.className = 'status-message success show';
-    status.textContent = '✅ Deposit successful!';
-    
-    // Refresh balance
-    const newBalance = await window.ChallengeHub.getInternalBalance();
-    depositedBalance = parseFloat(newBalance);
-    document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
-    
-    // Notify navbar to update
-    window.dispatchEvent(new Event('questcast:balance-updated'));
-    
-    setTimeout(() => {
-      document.getElementById('depositModal').classList.remove('show');
-      document.getElementById('depositForm').reset();
-      status.classList.remove('show');
-    }, 2000);
-    
-  } catch (error) {
-    console.error('Deposit error:', error);
-    status.className = 'status-message error show';
-    status.textContent = '❌ Deposit failed: ' + error.message;
-  }
-});
-
-// Withdraw form handler
-document.getElementById('withdrawForm')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const amount = document.getElementById('withdrawAmount').value;
-  const status = document.getElementById('withdrawStatus');
-  
-  if (parseFloat(amount) > depositedBalance) {
-    status.className = 'status-message error show';
-    status.textContent = '❌ Insufficient balance';
-    return;
-  }
-  
-  try {
-    status.className = 'status-message loading show';
-    status.textContent = '⏳ Withdrawing USDC...';
-    
-    const success = await window.ChallengeHub.withdrawUSDC(amount);
-    
-    if (!success) {
-      throw new Error('Withdrawal failed');
-    }
-    
-    status.className = 'status-message success show';
-    status.textContent = '✅ Withdrawal successful!';
-    
-    // Refresh balance
-    const newBalance = await window.ChallengeHub.getInternalBalance();
-    depositedBalance = parseFloat(newBalance);
-    document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
-    
-    // Notify navbar to update
-    window.dispatchEvent(new Event('questcast:balance-updated'));
-    
-    setTimeout(() => {
-      document.getElementById('withdrawModal').classList.remove('show');
-      document.getElementById('withdrawForm').reset();
-      status.classList.remove('show');
-    }, 2000);
-    
-  } catch (error) {
-    console.error('Withdraw error:', error);
-    status.className = 'status-message error show';
-    status.textContent = '❌ Withdrawal failed: ' + error.message;
-  }
-});
 
 // ═══════════════════════════════════════════════════════════════════
 // FILTERS

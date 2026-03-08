@@ -20,8 +20,7 @@
         </div>
       </div>
       <div style="display: flex; gap: 10px;">
-        <button id="depositBtn" class="btn btn-secondary" style="font-size: 14px;">💰 Deposit</button>
-        <button id="withdrawBtn" class="btn btn-secondary" style="font-size: 14px;">💸 Withdraw</button>
+        <a href="/profile" class="btn btn-secondary" style="font-size: 14px; text-decoration: none;">💰 Deposit / Withdraw</a>
         <button id="createChallengeBtn" class="btn btn-primary">➕ Create Challenge</button>
       </div>
     </div>
@@ -129,59 +128,6 @@
     </div>
   </div>
 
-  <!-- Deposit Modal -->
-  <div id="depositModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="document.getElementById('depositModal').classList.remove('show')">&times;</span>
-      <h2>💰 Deposit USDC</h2>
-      
-      <p style="margin-bottom: 20px;">Deposit USDC from your wallet to internal balance for betting.</p>
-      
-      <form id="depositForm">
-        <div class="form-group">
-          <label>Amount (USDC):</label>
-          <input type="number" id="depositAmount" step="0.01" min="0.01" placeholder="Enter amount" required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0,255,204,0.3); border-radius: 8px; color: white; font-size: 16px;">
-        </div>
-        
-        <div style="background: rgba(255,200,0,0.1); border: 1px solid rgba(255,200,0,0.3); border-radius: 8px; padding: 15px; margin: 15px 0;">
-          <p style="margin: 0; font-size: 14px;">⚠️ This requires 2 MetaMask transactions:</p>
-          <p style="margin: 5px 0 0 0; font-size: 13px;">1. Approve USDC token<br>2. Deposit to contract</p>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-large">Deposit</button>
-        <div class="status-message" id="depositStatus"></div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Withdraw Modal -->
-  <div id="withdrawModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="document.getElementById('withdrawModal').classList.remove('show')">&times;</span>
-      <h2>💸 Withdraw USDC</h2>
-      
-      <p style="margin-bottom: 20px;">Withdraw USDC from internal balance to your wallet.</p>
-      
-      <form id="withdrawForm">
-        <div class="form-group">
-          <label>Amount (USDC):</label>
-          <div style="margin-bottom: 10px; padding: 10px; background: rgba(0,255,204,0.1); border-radius: 8px;">
-            <div style="display: flex; justify-content: space-between;">
-              <span>Internal Balance:</span>
-              <strong id="withdrawAvailable">0.00 USDC</strong>
-            </div>
-          </div>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <input type="number" id="withdrawAmount" step="0.01" min="0.01" placeholder="Enter amount" required style="flex: 1; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0,255,204,0.3); border-radius: 8px; color: white; font-size: 16px;">
-            <button type="button" id="withdrawMaxBtn" style="padding: 12px 24px; background: rgba(0,255,204,0.2); border: 1px solid rgba(0,255,204,0.5); border-radius: 8px; color: #00ffcc; font-weight: bold; cursor: pointer; white-space: nowrap;">MAX</button>
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-large">Withdraw</button>
-        <div class="status-message" id="withdrawStatus"></div>
-      </form>
-    </div>
-  </div>
 </div>
 
 <link rel="stylesheet" href="/css/coinflip.css">

@@ -144,11 +144,16 @@ async function createChallenge(req, res) {
  */
 async function listChallenges(req, res) {
   try {
-    // Hent fra database cache (synced via events)
+    // Hent fra database cache (synced via events) + join med users for displayName
     const result = await pool.query(`
-      SELECT * FROM blockchain_challenges 
-      WHERE challenge_type = 'coinflip' AND status = 'open'
-      ORDER BY created_at DESC
+      SELECT 
+        bc.*,
+        u.display_name as creator_name,
+        u.avatar_url as creator_avatar
+      FROM blockchain_challenges bc
+      LEFT JOIN users u ON LOWER(u.wallet_address) = LOWER(bc.creator_address)
+      WHERE bc.challenge_type = 'coinflip' AND bc.status = 'open'
+      ORDER BY bc.created_at DESC
       LIMIT 50
     `);
 
@@ -159,6 +164,8 @@ async function listChallenges(req, res) {
       players: `${row.participantCount || 0}/${row.max_players}`,
       status: row.status,
       creatorAddress: row.creator_address,
+      creatorName: row.creator_name || 'Anonymous',
+      creatorAvatar: row.creator_avatar,
       createdAt: row.created_at
     }));
 
@@ -195,6 +202,29 @@ async function getChallenge(req, res) {
       outcomeText = outcome === ethers.id('heads') ? 'kron' : 'mynt';
     }
 
+    // Hent bets fra database med displayName
+    const betsResult = await pool.query(`
+      SELECT 
+        cb.*,
+        u.display_name,
+        u.avatar_url,
+        LOWER(cb.user_address) = LOWER($1) as is_creator
+      FROM coinflip_bets cb
+      LEFT JOIN users u ON LOWER(u.wallet_address) = LOWER(cb.user_address)
+      WHERE cb.challenge_id = $1
+      ORDER BY cb.placed_at ASC
+    `, [challengeId]);
+
+    const bets = betsResult.rows.map(row => ({
+      user_address: row.user_address,
+      user_name: row.display_name || 'Anonymous',
+      user_avatar: row.avatar_url,
+      amount: Number(row.amount) / 1e6,
+      choice: row.is_heads ? 'kron' : 'mynt',
+      claimed: row.claimed,
+      is_creator: row.is_creator
+    }));
+
     res.json({
       success: true,
       challenge: {
@@ -210,7 +240,8 @@ async function getChallenge(req, res) {
         outcome: outcomeText,
         createdAt: Number(createdAt),
         lockedAt: Number(lockedAt),
-        settledAt: Number(settledAt)
+        settledAt: Number(settledAt),
+        bets
       }
     });
 

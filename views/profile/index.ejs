@@ -139,7 +139,7 @@
       </div>
 
       <script>
-        const CONTRACT_ADDRESS = '<%= process.env.QUESTCAST_CONTRACT_ADDRESS || "" %>';
+        const CONTRACT_ADDRESS = '<%= process.env.CHALLENGE_HUB_ADDRESS || process.env.QUESTCAST_CONTRACT_ADDRESS || "" %>';
         const USDC_ADDRESS     = '<%= process.env.USDC_CONTRACT_ADDRESS || "" %>';
         const USER_WALLET      = '<%= user.walletAddress %>';
 
