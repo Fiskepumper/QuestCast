@@ -4,7 +4,7 @@
   "description": "QuestCast - Live challenge registration platform",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node start-all.js",
     "dev": "node server.js",
     "oracle": "node services/coinflip-oracle.js",
     "sync": "node services/event-sync.js"
