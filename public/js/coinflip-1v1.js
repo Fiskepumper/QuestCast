@@ -83,6 +83,17 @@ async function updateBalance() {
   if (!walletAddress) return;
   
   try {
+    // Try to get balance directly from blockchain via MetaMask (more accurate)
+    try {
+      const blockchainBalance = await window.ChallengeHub.getInternalBalance();
+      depositedBalance = parseFloat(blockchainBalance);
+      document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
+      return;
+    } catch (blockchainError) {
+      console.warn('Blockchain balance fetch failed, falling back to API:', blockchainError);
+    }
+    
+    // Fallback: Use backend API
     const response = await fetch(`/api/contract-balance?address=${walletAddress}`);
     const data = await response.json();
     

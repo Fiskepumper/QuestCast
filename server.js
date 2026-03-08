@@ -134,14 +134,14 @@ app.get('/api/wallet-balances', async (req, res) => {
   }
 });
 
-// Leser brukerens innskutte USDC-balanse fra QuestCast smartkontrakt (balances[user])
+// Leser brukerens innskutte USDC-balanse fra ChallengeHub smartkontrakt (balances[user])
 // Funksjonsselektoren for getBalance(address) er 0xf8b2cb4f
 app.get('/api/contract-balance', async (req, res) => {
   const { address } = req.query;
   if (!address || !/^0x[0-9a-fA-F]{40}$/.test(address)) {
     return res.status(400).json({ error: 'Ugyldig adresse' });
   }
-  const contractAddress = process.env.QUESTCAST_CONTRACT_ADDRESS;
+  const contractAddress = process.env.CHALLENGE_HUB_ADDRESS || process.env.QUESTCAST_CONTRACT_ADDRESS;
   if (!contractAddress) return res.json({ usdc: '0.00' });
 
   const RPC_URLS = [
