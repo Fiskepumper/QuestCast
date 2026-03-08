@@ -206,18 +206,23 @@ async function createChallengeOnChain(params) {
     const createReceipt = await createTx.wait();
 
     // Get challenge ID from event (ethers v6 approach)
-    console.log('🔍 Parsing transaction receipt...');
+    console.log('🔍 Parsing transaction receipt...', createReceipt);
     let challengeId = null;
     
     for (const log of createReceipt.logs) {
       try {
-        const parsed = challengeHubContract.interface.parseLog({
-          topics: log.topics,
+        // Try to decode the log using our contract interface
+        const parsedLog = challengeHubContract.interface.parseLog({
+          topics: [...log.topics],
           data: log.data
         });
         
-        if (parsed && parsed.name === 'ChallengeCreated') {
-          challengeId = parsed.args[0].toString();
+        console.log('📝 Parsed log:', parsedLog);
+        
+        if (parsedLog && parsedLog.name === 'ChallengeCreated') {
+          // In ethers v6, args is an object with named properties
+          challengeId = parsedLog.args.id || parsedLog.args[0];
+          challengeId = challengeId.toString();
           console.log('✅ Found challenge ID:', challengeId);
           break;
         }
@@ -228,6 +233,8 @@ async function createChallengeOnChain(params) {
     }
 
     if (!challengeId) {
+      console.error('❌ Could not find ChallengeCreated event in receipt');
+      console.error('Receipt logs:', createReceipt.logs);
       throw new Error('Failed to get challenge ID from transaction receipt');
     }
 

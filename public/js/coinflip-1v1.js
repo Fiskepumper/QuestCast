@@ -107,24 +107,70 @@ async function loadChallenges(status = null) {
       : '/api/coinflip/list';
     
     const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Backend API error: ${response.status}`);
+    }
+    
     const data = await response.json();
     
-    if (data.challenges.length === 0) {
-      grid.innerHTML = '<div class="loading">Ingen challenges. Opprett den første!</div>';
+    if (!data.challenges || data.challenges.length === 0) {
+      grid.innerHTML = `
+        <div class="loading" style="text-align: center; padding: 40px;">
+          <p>📭 Ingen challenges funnet i database.</p>
+          <p style="margin-top: 10px; font-size: 14px; opacity: 0.7;">
+            ⚠️ Event sync service kjører ikke i Azure ennå.<br>
+            Challenges må hentes direkte fra blockchain.
+          </p>
+        </div>
+      `;
       return;
     }
     
     grid.innerHTML = '';
     
     for (const challenge of data.challenges) {
-      const detail = await fetch(`/api/coinflip/${challenge.id}`).then(r => r.json());
-      const card = createChallengeCard(challenge, detail);
-      grid.appendChild(card);
+      try {
+        const detailResponse = await fetch(`/api/coinflip/${challenge.id}`);
+        
+        if (!detailResponse.ok) {
+          console.warn(`Failed to load challenge ${challenge.id}`);
+          continue;
+        }
+        
+        const detail = await detailResponse.json();
+        const card = createChallengeCard(challenge, detail);
+        grid.appendChild(card);
+      } catch (err) {
+        console.error(`Error loading challenge ${challenge.id}:`, err);
+        continue;
+      }
+    }
+    
+    // If no cards were added, show message
+    if (grid.children.length === 0) {
+      grid.innerHTML = `
+        <div class="loading" style="text-align: center; padding: 40px;">
+          <p>⚠️ Kunne ikke laste challenges</p>
+          <p style="margin-top: 10px; font-size: 14px;">Event sync service må startes i Azure.</p>
+        </div>
+      `;
     }
     
   } catch (error) {
     console.error('Load error:', error);
-    grid.innerHTML = '<div class="loading">Feil ved lasting</div>';
+    grid.innerHTML = `
+      <div class="loading" style="text-align: center; padding: 40px;">
+        <p>❌ Feil ved lasting av challenges</p>
+        <p style="margin-top: 10px; font-size: 14px; opacity: 0.7;">
+          ${error.message}
+        </p>
+        <p style="margin-top: 15px; font-size: 13px;">
+          💡 Event sync service kjører ikke i Azure ennå.<br>
+          Challenges må synkroniseres fra blockchain til database.
+        </p>
+      </div>
+    `;
   }
 }
 
