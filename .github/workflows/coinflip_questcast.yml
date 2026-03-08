@@ -38,22 +38,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F53657638C9944D4BF4500AB3DB5DC6E }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_07513A7E09944E979A69D98FB7F59064 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_16579F9A03FD4387AC2609A7222D1599 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -61,4 +51,5 @@ jobs:
         with:
           app-name: 'questcast'
           slot-name: 'coinflip'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_COINFLIP }}
           package: .
