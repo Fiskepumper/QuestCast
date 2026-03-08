@@ -48,6 +48,79 @@ async function getDepositedBalance(walletAddress) {
   return 0;
 }
 
+/**
+ * Sync user balance from blockchain to database
+ */
+async function syncBalance(walletAddress) {
+  const depositedOnChain = await getDepositedBalance(walletAddress);
+  const depositedOnChainMicro = Math.floor(depositedOnChain * 1e6);
+  
+  const walletLower = walletAddress.toLowerCase();
+
+  // Get or create balance record
+  const existing = await pool.query(
+    'SELECT * FROM user_balances WHERE wallet_address = $1',
+    [walletLower]
+  );
+
+  if (existing.rows.length === 0) {
+    // First time - create record
+    await pool.query(`
+      INSERT INTO user_balances (wallet_address, deposited, available, locked, last_synced_at)
+      VALUES ($1, $2, $2, 0, NOW())
+    `, [walletLower, depositedOnChainMicro]);
+    
+    return { deposited: depositedOnChain, available: depositedOnChain, locked: 0 };
+  }
+
+  const current = existing.rows[0];
+  const oldDeposited = BigInt(current.deposited);
+  const newDeposited = BigInt(depositedOnChainMicro);
+
+  if (newDeposited > oldDeposited) {
+    // User deposited more - add difference to available
+    const diff = newDeposited - oldDeposited;
+    await pool.query(`
+      UPDATE user_balances 
+      SET deposited = $1, available = available + $2, last_synced_at = NOW(), updated_at = NOW()
+      WHERE wallet_address = $3
+    `, [depositedOnChainMicro, diff.toString(), walletLower]);
+
+    const newAvailable = BigInt(current.available) + diff;
+    return {
+      deposited: depositedOnChain,
+      available: Number(newAvailable) / 1e6,
+      locked: Number(current.locked) / 1e6
+    };
+  }
+
+  // No change or withdrawal (shouldn't happen in this system)
+  return {
+    deposited: Number(current.deposited) / 1e6,
+    available: Number(current.available) / 1e6,
+    locked: Number(current.locked) / 1e6
+  };
+}
+
+/**
+ * Get available balance for betting
+ */
+async function getAvailableBalance(walletAddress) {
+  const walletLower = walletAddress.toLowerCase();
+  const result = await pool.query(
+    'SELECT available FROM user_balances WHERE wallet_address = $1',
+    [walletLower]
+  );
+  
+  if (result.rows.length === 0) {
+    // Not synced yet - sync now
+    const synced = await syncBalance(walletAddress);
+    return synced.available;
+  }
+  
+  return Number(result.rows[0].available) / 1e6;
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // API ENDPOINTS
 // ═══════════════════════════════════════════════════════════════════
@@ -78,11 +151,14 @@ async function createChallenge(req, res) {
   }
 
   try {
-    // Check deposited balance
-    const balance = await getDepositedBalance(userWallet);
+    // Sync balance from blockchain first
+    await syncBalance(userWallet);
+
+    // Check available balance (not locked in other games)
+    const balance = await getAvailableBalance(userWallet);
     if (balance < amount) {
       return res.status(400).json({ 
-        error: `Insufficient balance. You have ${balance.toFixed(2)} USDC deposited.` 
+        error: `Insufficient available balance. You have ${balance.toFixed(2)} USDC available (some may be locked in other games).` 
       });
     }
 
@@ -113,6 +189,13 @@ async function createChallenge(req, res) {
       SET total_pot = $1, total_fee = $2
       WHERE chain_id = $3
     `, [betAmount, feeAmount, challengeId]);
+
+    // LOCK FUNDS: Move from available to locked
+    await pool.query(`
+      UPDATE user_balances 
+      SET available = available - $1, locked = locked + $1, updated_at = NOW()
+      WHERE wallet_address = $2
+    `, [Math.floor(amount * 1e6), userWallet.toLowerCase()]);
 
     res.json({ 
       success: true, 
@@ -183,13 +266,16 @@ async function joinChallenge(req, res) {
     const creatorChoice = creatorBet.rows[0].choice;
     const yourChoice = creatorChoice === 'heads' ? 'tails' : 'heads';
 
-    // Check balance
+    // Sync balance from blockchain first
+    await syncBalance(userWallet);
+
+    // Check available balance
     const amount = challenge.entry_fee / 1e6;
-    const balance = await getDepositedBalance(userWallet);
+    const balance = await getAvailableBalance(userWallet);
     
     if (balance < amount) {
       return res.status(400).json({ 
-        error: `Insufficient balance. You need ${amount.toFixed(2)} USDC but have ${balance.toFixed(2)} USDC deposited.` 
+        error: `Insufficient available balance. You need ${amount.toFixed(2)} USDC but have ${balance.toFixed(2)} USDC available.` 
       });
     }
 
@@ -210,6 +296,13 @@ async function joinChallenge(req, res) {
       SET status = 'locked', locked_at = NOW(), total_pot = total_pot + $1, total_fee = total_fee + $2
       WHERE chain_id = $3
     `, [betAmount, feeAmount, challengeId]);
+
+    // LOCK FUNDS: Move from available to locked
+    await pool.query(`
+      UPDATE user_balances 
+      SET available = available - $1, locked = locked + $1, updated_at = NOW()
+      WHERE wallet_address = $2
+    `, [Math.floor(amount * 1e6), userWallet.toLowerCase()]);
 
     res.json({ 
       success: true,
@@ -394,10 +487,44 @@ async function getChallenge(req, res) {
   }
 }
 
+/**
+ * GET /api/coinflip/balance
+ * Get user's balance (sync from blockchain first)
+ */
+async function getBalance(req, res) {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  const userWallet = req.user.walletAddress;
+
+  if (!userWallet) {
+    return res.status(400).json({ error: 'Wallet not connected' });
+  }
+
+  try {
+    // Sync from blockchain
+    const synced = await syncBalance(userWallet);
+    
+    res.json({
+      success: true,
+      deposited: synced.deposited,
+      available: synced.available,
+      locked: synced.locked,
+      wallet: userWallet
+    });
+
+  } catch (error) {
+    console.error('Get balance error:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   createChallenge,
   joinChallenge,
   claimPrize,
   listChallenges,
-  getChallenge
+  getChallenge,
+  getBalance
 };

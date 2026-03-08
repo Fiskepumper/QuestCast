@@ -45,20 +45,50 @@ async function settleChallenge(req, res) {
       WHERE chain_id = $2
     `, [outcome, challengeId]);
 
-    // Get winner info
-    const winnerResult = await pool.query(`
-      SELECT * FROM coinflip_bets 
-      WHERE challenge_id = $1 AND choice = $2
-    `, [challengeId, outcome]);
+    // Get all bets
+    const betsResult = await pool.query(`
+      SELECT * FROM coinflip_bets WHERE challenge_id = $1
+    `, [challengeId]);
 
-    const winner = winnerResult.rows[0];
+    const bets = betsResult.rows;
+    const winner = bets.find(b => b.choice === outcome);
+    const loser = bets.find(b => b.choice !== outcome);
+
+    // Total pot goes to winner
+    const totalPayout = parseInt(challenge.total_pot);
+    const entryFee = parseInt(challenge.entry_fee);
+
+    if (winner) {
+      // UNLOCK WINNER: Release locked funds + give them the pot
+      await pool.query(`
+        UPDATE user_balances 
+        SET locked = locked - $1, available = available + $2, updated_at = NOW()
+        WHERE wallet_address = $3
+      `, [entryFee, entryFee + totalPayout, winner.user_address.toLowerCase()]);
+
+      // Update winner's payout in bets table
+      await pool.query(`
+        UPDATE coinflip_bets 
+        SET payout = $1, claimed = true
+        WHERE challenge_id = $2 AND user_address = $3
+      `, [totalPayout, challengeId, winner.user_address.toLowerCase()]);
+    }
+
+    if (loser) {
+      // UNLOCK LOSER: Just release their locked funds (they lose the money)
+      await pool.query(`
+        UPDATE user_balances 
+        SET locked = locked - $1, updated_at = NOW()
+        WHERE wallet_address = $2
+      `, [entryFee, loser.user_address.toLowerCase()]);
+    }
 
     res.json({ 
       success: true,
       outcome,
       winner: winner ? {
         address: winner.user_address,
-        payout: challenge.total_pot / 1e6
+        payout: totalPayout / 1e6
       } : null,
       message: `Challenge settled! Winner: ${outcome}`
     });

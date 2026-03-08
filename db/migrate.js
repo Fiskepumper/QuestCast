@@ -45,6 +45,24 @@ async function migrate() {
     `);
     console.log('✅ Updated existing records');
     
+    // Create user_balances table for virtual balance tracking
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_balances (
+        wallet_address  TEXT PRIMARY KEY,
+        deposited       BIGINT DEFAULT 0,
+        available       BIGINT DEFAULT 0,
+        locked          BIGINT DEFAULT 0,
+        last_synced_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+    console.log('✅ Created user_balances table');
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_user_balances_wallet ON user_balances(wallet_address);
+    `);
+    console.log('✅ Created index on user_balances');
+    
     console.log('\n🎉 Migration completed successfully!');
     
   } catch (error) {

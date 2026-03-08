@@ -93,6 +93,22 @@ CREATE INDEX IF NOT EXISTS idx_bets_challenge ON coinflip_bets(challenge_id);
 CREATE INDEX IF NOT EXISTS idx_bets_user ON coinflip_bets(user_address);
 CREATE INDEX IF NOT EXISTS idx_bets_user_uuid ON coinflip_bets(user_uuid);
 
+-- ═══════════════════════════════════════════════════════════════════════════
+-- USER BALANCES (Virtual balance tracking for deposited funds)
+-- ═══════════════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS user_balances (
+  wallet_address  TEXT PRIMARY KEY,     -- Wallet address (lowercase)
+  deposited       BIGINT DEFAULT 0,     -- Total deposited on-chain (USDC 6 decimals)
+  available       BIGINT DEFAULT 0,     -- Available for betting
+  locked          BIGINT DEFAULT 0,     -- Locked in active challenges
+  last_synced_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Index for fast lookups
+CREATE INDEX IF NOT EXISTS idx_user_balances_wallet ON user_balances(wallet_address);
+
 -- Migrate existing tables to BIGINT (safe to run multiple times)
 DO $$ 
 BEGIN

@@ -373,6 +373,7 @@ const coinflipSettle = require('./challenges/coinflip-settle');
 app.post('/api/coinflip/create', coinflipSimple.createChallenge);
 app.post('/api/coinflip/:id/join', coinflipSimple.joinChallenge);
 app.post('/api/coinflip/:id/claim', coinflipSimple.claimPrize);
+app.get('/api/coinflip/balance', coinflipSimple.getBalance);
 
 // Public endpoints
 app.get('/api/coinflip/list', coinflipSimple.listChallenges);
