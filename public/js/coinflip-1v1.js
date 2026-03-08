@@ -185,22 +185,25 @@ function createChallengeCard(challenge, detail) {
   const card = document.createElement('div');
   card.className = 'challenge-card';
   
+  // Extract challenge data from API response (backend returns { success, challenge })
+  const bets = detail.challenge?.bets || [];
+  
   const statusClass = `status-${challenge.status}`;
   const amount = (parseInt(challenge.entryFee) / 1e6).toFixed(2);
-  const participantCount = detail.bets.length;
+  const participantCount = bets.length;
   const needsOpponent = challenge.status === 'open' && participantCount < 2;
   
   // Find creator info
-  const creatorBet = detail.bets.find(b => b.is_creator);
+  const creatorBet = bets.find(b => b.is_creator);
   const creatorChoice = creatorBet ? creatorBet.choice : '?';
   
   // Check if current user is creator
-  const isCreator = detail.bets.some(b => 
+  const isCreator = bets.some(b => 
     b.user_address.toLowerCase() === walletAddress?.toLowerCase() && b.is_creator
   );
   
   // Check if current user already bet
-  const userBet = detail.bets.find(b => 
+  const userBet = bets.find(b => 
     b.user_address.toLowerCase() === walletAddress?.toLowerCase()
   );
   
@@ -251,7 +254,7 @@ function createChallengeCard(challenge, detail) {
     ${challenge.status === 'settled' && challenge.outcome ? `
       <div class="challenge-outcome">
         ${(() => {
-          const winnerBet = detail.bets.find(b => b.choice === challenge.outcome);
+          const winnerBet = bets.find(b => b.choice === challenge.outcome);
           const winnerName = winnerBet ? winnerBet.user_name : 'Unknown';
           return `
             <div style="margin-bottom: 10px;">
