@@ -19,9 +19,19 @@ const CURRENT_USER_UUID = window.CURRENT_USER_UUID || '';
 
 async function setupWallet() {
   const createBtn = document.getElementById('createChallengeBtn');
+  const depositBtn = document.getElementById('depositBtn');
+  const withdrawBtn = document.getElementById('withdrawBtn');
   
   if (createBtn) {
     createBtn.addEventListener('click', openCreateModal);
+  }
+  
+  if (depositBtn) {
+    depositBtn.addEventListener('click', openDepositModal);
+  }
+  
+  if (withdrawBtn) {
+    withdrawBtn.addEventListener('click', openWithdrawModal);
   }
   
   // Check if user is logged in (has wallet address from session)
@@ -293,33 +303,29 @@ async function handleCreateSubmit(e) {
   
   try {
     status.className = 'status-message loading show';
-    status.textContent = '⏳ Creating challenge...';
+    status.textContent = '⏳ Creating challenge on blockchain...';
     
     // Generate a simple name
     const name = `Coinflip ${Date.now()}`;
     
-    // Call backend API to create challenge
-    const response = await fetch('/api/coinflip/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        amount,
-        choice
-      })
+    // Create challenge on-chain via MetaMask
+    const challengeId = await window.ChallengeHub.createChallengeOnChain({
+      name,
+      amount: amount.toString(),
+      choice
     });
     
-    const result = await response.json();
-    
-    if (result.error) {
-      throw new Error(result.error);
+    if (!challengeId) {
+      throw new Error('Failed to create challenge on blockchain');
     }
     
     status.className = 'status-message success show';
-    status.textContent = `✅ Challenge created! ID: ${result.challengeId}`;
+    status.textContent = `✅ Challenge created! ID: ${challengeId}`;
     
     // Refresh balance
-    await updateBalance();
+    const newBalance = await window.ChallengeHub.getInternalBalance();
+    depositedBalance = parseFloat(newBalance);
+    document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
     
     setTimeout(() => {
       closeCreateModal();
@@ -346,8 +352,7 @@ async function openJoinModal(challengeId, name, amount, creatorChoice) {
   
   // Check balance
   if (amount > depositedBalance) {
-    console.error(`Insufficient balance. Have ${depositedBalance}, need ${amount}`);
-    // Show error in UI somehow
+    alert(`❌ Insufficient balance. You have ${depositedBalance.toFixed(2)} USDC, need ${amount.toFixed(2)} USDC`);
     return;
   }
   
@@ -355,15 +360,18 @@ async function openJoinModal(challengeId, name, amount, creatorChoice) {
   document.getElementById('joinChallengeName').textContent = name;
   document.getElementById('joinAmount').textContent = amount.toFixed(2) + ' USDC';
   
-  const creatorChoiceText = creatorChoice === 'heads' ? 'Kron' : 'Mynt';
-  const yourChoice = creatorChoice === 'heads' ? 'tails' : 'heads';
-  const yourChoiceText = yourChoice === 'heads' ? 'Kron' : 'Mynt';
+  const creatorChoiceText = creatorChoice === 'kron' ? 'Kron' : 'Mynt';
+  const yourChoice = creatorChoice === 'kron' ? 'mynt' : 'kron';
+  const yourChoiceText = yourChoice === 'kron' ? 'Kron' : 'Mynt';
   
   document.getElementById('joinCreatorChoice').innerHTML = 
-    `<img src="/${creatorChoice === 'heads' ? 'Kron' : 'Mynt'}.png" alt="${creatorChoice}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> ${creatorChoiceText}`;
+    `<img src="/${creatorChoice === 'kron' ? 'Kron' : 'Mynt'}.png" alt="${creatorChoice}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> ${creatorChoiceText}`;
   
   document.getElementById('joinYourChoice').innerHTML = 
-    `<img src="/${yourChoice === 'heads' ? 'Kron' : 'Mynt'}.png" alt="${yourChoice}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> ${yourChoiceText}`;
+    `<img src="/${yourChoice === 'kron' ? 'Kron' : 'Mynt'}.png" alt="${yourChoice}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;"> ${yourChoiceText}`;
+  
+  // Store choice for later
+  document.getElementById('joinYourChoice').dataset.choice = yourChoice;
   
   const fee = amount * 0.02;
   document.getElementById('joinFee').textContent = fee.toFixed(2) + ' USDC';
@@ -379,34 +387,32 @@ document.getElementById('joinForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   
   const challengeId = document.getElementById('joinChallengeId').value;
+  const yourChoice = document.getElementById('joinYourChoice').dataset.choice;
   const status = document.getElementById('joinStatus');
   
   try {
     status.className = 'status-message loading show';
-    status.textContent = '⏳ Joining challenge...';
+    status.textContent = '⏳ Joining challenge on blockchain...';
     
-    // Call backend API to join challenge
-    const response = await fetch(`/api/coinflip/${challengeId}/join`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
+    // Join challenge on-chain via MetaMask
+    const success = await window.ChallengeHub.joinChallengeOnChain(challengeId, yourChoice);
     
-    const result = await response.json();
-    
-    if (result.error) {
-      throw new Error(result.error);
+    if (!success) {
+      throw new Error('Failed to join challenge on blockchain');
     }
     
     status.className = 'status-message success show';
-    status.textContent = '✅ Joined! Challenge is now locked. Admin will settle soon.';
+    status.textContent = '✅ Joined! Challenge is now locked. Oracle will settle automatically soon.';
     
     // Refresh balance
-    await updateBalance();
+    const newBalance = await window.ChallengeHub.getInternalBalance();
+    depositedBalance = parseFloat(newBalance);
+    document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
     
     setTimeout(() => {
       closeJoinModal();
       loadChallenges(currentFilter);
-    }, 1500);
+    }, 2000);
     
   } catch (error) {
     console.error('Join error:', error);
@@ -421,30 +427,136 @@ document.getElementById('joinForm')?.addEventListener('submit', async (e) => {
 
 async function claimPrize(challengeId) {
   if (!walletAddress) {
-    console.error('Du må være logget inn først');
+    alert('❌ You must be logged in to claim prize');
+    return;
+  }
+  
+  if (!confirm('🏆 Claim your prize? This will add winnings to your internal balance.')) {
     return;
   }
   
   try {
-    const response = await fetch(`/api/coinflip/${challengeId}/claim`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
+    // Claim prize on-chain via MetaMask
+    const success = await window.ChallengeHub.claimPrizeOnChain(challengeId);
     
-    const result = await response.json();
-    
-    if (result.error) {
-      throw new Error(result.error);
+    if (!success) {
+      throw new Error('Failed to claim prize on blockchain');
     }
     
-    console.log('✅ Prize claimed!', result);
-    await updateBalance();
+    alert('✅ Prize claimed! Check your balance.');
+    
+    // Refresh balance
+    const newBalance = await window.ChallengeHub.getInternalBalance();
+    depositedBalance = parseFloat(newBalance);
+    document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
+    
     loadChallenges(currentFilter);
     
   } catch (error) {
     console.error('Claim error:', error);
+    alert('❌ Failed to claim prize: ' + error.message);
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// DEPOSIT & WITHDRAW
+// ═══════════════════════════════════════════════════════════════════
+
+function openDepositModal() {
+  document.getElementById('depositModal').classList.add('show');
+}
+
+function openWithdrawModal() {
+  document.getElementById('withdrawAvailable').textContent = depositedBalance.toFixed(2) + ' USDC';
+  document.getElementById('withdrawModal').classList.add('show');
+  
+  // Setup max button
+  document.getElementById('withdrawMaxBtn').onclick = () => {
+    document.getElementById('withdrawAmount').value = depositedBalance.toFixed(2);
+  };
+}
+
+// Deposit form handler
+document.getElementById('depositForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const amount = document.getElementById('depositAmount').value;
+  const status = document.getElementById('depositStatus');
+  
+  try {
+    status.className = 'status-message loading show';
+    status.textContent = '⏳ Step 1: Approving USDC...';
+    
+    const success = await window.ChallengeHub.depositUSDC(amount);
+    
+    if (!success) {
+      throw new Error('Deposit failed');
+    }
+    
+    status.className = 'status-message success show';
+    status.textContent = '✅ Deposit successful!';
+    
+    // Refresh balance
+    const newBalance = await window.ChallengeHub.getInternalBalance();
+    depositedBalance = parseFloat(newBalance);
+    document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
+    
+    setTimeout(() => {
+      document.getElementById('depositModal').classList.remove('show');
+      document.getElementById('depositForm').reset();
+      status.classList.remove('show');
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Deposit error:', error);
+    status.className = 'status-message error show';
+    status.textContent = '❌ Deposit failed: ' + error.message;
+  }
+});
+
+// Withdraw form handler
+document.getElementById('withdrawForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const amount = document.getElementById('withdrawAmount').value;
+  const status = document.getElementById('withdrawStatus');
+  
+  if (parseFloat(amount) > depositedBalance) {
+    status.className = 'status-message error show';
+    status.textContent = '❌ Insufficient balance';
+    return;
+  }
+  
+  try {
+    status.className = 'status-message loading show';
+    status.textContent = '⏳ Withdrawing USDC...';
+    
+    const success = await window.ChallengeHub.withdrawUSDC(amount);
+    
+    if (!success) {
+      throw new Error('Withdrawal failed');
+    }
+    
+    status.className = 'status-message success show';
+    status.textContent = '✅ Withdrawal successful!';
+    
+    // Refresh balance
+    const newBalance = await window.ChallengeHub.getInternalBalance();
+    depositedBalance = parseFloat(newBalance);
+    document.getElementById('usdcBalance').textContent = depositedBalance.toFixed(2);
+    
+    setTimeout(() => {
+      document.getElementById('withdrawModal').classList.remove('show');
+      document.getElementById('withdrawForm').reset();
+      status.classList.remove('show');
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Withdraw error:', error);
+    status.className = 'status-message error show';
+    status.textContent = '❌ Withdrawal failed: ' + error.message;
+  }
+});
 
 // ═══════════════════════════════════════════════════════════════════
 // FILTERS
