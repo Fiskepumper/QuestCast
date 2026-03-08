@@ -214,7 +214,7 @@ async function getChallenge(req, res) {
       FROM coinflip_bets cb
       LEFT JOIN users u ON LOWER(u.wallet_address) = LOWER(cb.user_address)
       WHERE cb.challenge_id = $1::bigint
-      ORDER BY cb.placed_at ASC
+      ORDER BY cb.bet_at ASC
     `, [challengeId]);
 
     const bets = betsResult.rows.map(row => ({
